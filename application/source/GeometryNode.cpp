@@ -8,7 +8,7 @@ GeometryNode::GeometryNode(std::string const &name,
 GeometryNode::GeometryNode(std::string const &name,
                            model const &geometry_model) : Node{name}, geometry_{geometry_model} {};
 
-model GeometryNode::getGeometry(){
+model GeometryNode::getGeometry() const&{
     return geometry_;
 };
 

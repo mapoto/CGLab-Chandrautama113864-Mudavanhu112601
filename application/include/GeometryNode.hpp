@@ -1,5 +1,5 @@
-#ifndef GEOMETRY_HPP
-#define GEOMETRY_HPP
+#ifndef GEOMETRY_NODE_HPP
+#define GEOMETRY_NODE_HPP
 
 #include <model.hpp>
 #include <Node.hpp>
@@ -15,8 +15,8 @@ public:
 
     ~GeometryNode();
 
-    model getGeometry();
+    model getGeometry() const&;
     void setGeometry(model const &geometry_model);
 };
 
-#endif // GEOMETRY_HPP
+#endif // GEOMETRY_NODE_HPP

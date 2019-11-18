@@ -27,15 +27,14 @@ void Node::setParent(Node *parent)
 
 std::shared_ptr<Node> Node::getChild(std::string const &name) const
 {
-    std::shared_ptr<Node> child = nullptr;
-    std::for_each(children_.begin, children_.end, [name](std::shared_ptr<Node> node) {
+    auto it = std::find_if(children_.begin(), children_.end(), [name](std::shared_ptr<Node> node) {
         if (node->getName() == name)
         {
             return node;
-        }
+        };
     });
 
-    return child;
+    return *it;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,13 +103,10 @@ void Node::addChild(Node &node)
 
 std::shared_ptr<Node> Node::removeChild(std::string const &name)
 {
+    std::shared_ptr<Node> unwanted = getChild(name);
+    unwanted->setParent(nullptr);
 
-    std::shared_ptr<Node> removed = getChild(name);
+    children_.remove(unwanted);
 
-    children_.remove_if(
-        [name](Node *node) {
-            return node->getName() == name;
-        });
-
-    return removed;
+    return unwanted;
 }
