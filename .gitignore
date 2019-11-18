@@ -2,5 +2,6 @@ build
 install
 *.o
 *.sublime-workspace
+*.vscode
 *~
 .DS_Store 
