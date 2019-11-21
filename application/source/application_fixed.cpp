@@ -12,9 +12,7 @@ using namespace gl;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <SceneGraph.hpp>
-#include <GeometryNode.hpp>
-#include <CameraNode.hpp>
+
 
 ApplicationFixed::ApplicationFixed(std::string const &resource_path)
     : Application{resource_path}
@@ -50,40 +48,4 @@ void ApplicationFixed::render() const
 int main(int argc, char *argv[])
 {
   Application::run<ApplicationFixed>(argc, argv, 1, 0);
-
-  std::shared_ptr<SceneGraph> scene0 = scene0->getInstance();
-
-  std::shared_ptr<Node> root_scene0 = scene0->getRoot();
-
-  CameraNode cam = CameraNode{"camera_node"};
-  root_scene0->addChild(cam);
-
-  Node holder_mercury = Node{"holder_mercury"};
-  Node holder_venus = Node{"holder_venus"};
-  Node holder_earth = Node{"holder_earth"};
-  Node holder_mars = Node{"holder_mars"};
-  Node holder_jupiter = Node{"holder_jupiter"};
-  Node holder_saturn = Node{"holder_saturn"};
-  Node holder_uranus = Node{"holder_uranus"};
-  Node holder_neptune = Node{"holder_neptune"};
-
-  root_scene0->addChild(holder_mercury);
-  root_scene0->addChild(holder_venus);
-  root_scene0->addChild(holder_earth);
-  root_scene0->addChild(holder_mars);
-  root_scene0->addChild(holder_jupiter);
-  root_scene0->addChild(holder_saturn);
-  root_scene0->addChild(holder_uranus);
-  root_scene0->addChild(holder_neptune);
-
-  // GeometryNode geo_mercury = GeometryNode{"geo_mercury", };
-  // GeometryNode geo_venus = GeometryNode{"geo_venus", };
-  // GeometryNode geo_earth = GeometryNode{"geo_earth", };
-  // GeometryNode geo_mars = GeometryNode{"geo_mars", };
-  // GeometryNode geo_jupiter = GeometryNode{"geo_jupiter", };
-  // GeometryNode geo_saturn = GeometryNode{"geo_saturn", };
-  // GeometryNode geo_uranus = GeometryNode{"geo_uranus", };
-  // GeometryNode geo_neptune = GeometryNode{"geo_neptune", };
-
-  std::cout << root_scene0->getPath() << std::endl;
 }

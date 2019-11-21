@@ -19,6 +19,11 @@ using namespace gl;
 
 #include <iostream>
 
+
+#include <SceneGraph.hpp>
+#include <GeometryNode.hpp>
+#include <CameraNode.hpp>
+
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
  ,planet_object{}
@@ -160,4 +165,39 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 // exe entry point
 int main(int argc, char* argv[]) {
   Application::run<ApplicationSolar>(argc, argv, 3, 2);
+  
+  SceneGraph* scene_0 = scene_0->getInstance("scene_0");
+
+  // std::shared_ptr<Node> root_scene_0 = scene_0->getRoot();
+
+  // CameraNode cam = CameraNode{"camera_node"};
+  // root_scene_0->addChild(cam);
+
+  // Node holder_mercury = Node{"holder_mercury"};
+  // Node holder_venus = Node{"holder_venus"};
+  // Node holder_earth = Node{"holder_earth"};
+  // Node holder_mars = Node{"holder_mars"};
+  // Node holder_jupiter = Node{"holder_jupiter"};
+  // Node holder_saturn = Node{"holder_saturn"};
+  // Node holder_uranus = Node{"holder_uranus"};
+  // Node holder_neptune = Node{"holder_neptune"};
+
+  // root_scene_0->addChild(holder_mercury);
+  // root_scene_0->addChild(holder_venus);
+  // root_scene_0->addChild(holder_earth);
+  // root_scene_0->addChild(holder_mars);
+  // root_scene_0->addChild(holder_jupiter);
+  // root_scene_0->addChild(holder_saturn);
+  // root_scene_0->addChild(holder_uranus);
+  // root_scene_0->addChild(holder_neptune);
+
+  // GeometryNode geo_mercury = GeometryNode{"geo_mercury", };
+  // GeometryNode geo_venus = GeometryNode{"geo_venus", };
+  // GeometryNode geo_earth = GeometryNode{"geo_earth", };
+  // GeometryNode geo_mars = GeometryNode{"geo_mars", };
+  // GeometryNode geo_jupiter = GeometryNode{"geo_jupiter", };
+  // GeometryNode geo_saturn = GeometryNode{"geo_saturn", };
+  // GeometryNode geo_uranus = GeometryNode{"geo_uranus", };
+  // GeometryNode geo_neptune = GeometryNode{"geo_neptune", };
+
 }
