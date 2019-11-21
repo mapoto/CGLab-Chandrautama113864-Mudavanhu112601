@@ -14,10 +14,14 @@ class SceneGraph {
   void setName(std::string const& name);
   void setRoot(std::shared_ptr<Node> const& root);
 
-  SceneGraph(std::string const& name);
+  SceneGraph();
+  ~SceneGraph();
 
  public:
-  static SceneGraph* getInstance(std::string const& name);
+  static SceneGraph* getInstance();
+  SceneGraph();
+  ~SceneGraph();
+
   std::string getName() const;
   std::shared_ptr<Node> getRoot() const;
   std::string printGraph() const;
