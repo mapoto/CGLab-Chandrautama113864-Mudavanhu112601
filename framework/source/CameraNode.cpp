@@ -1,13 +1,5 @@
 #include <CameraNode.hpp>
 
-CameraNode::CameraNode(std::string const& name,
-                       std::string const& path,
-                       int depth)
-    : Node{name, path, depth},
-      isPerspective_{true},
-      isEnabled_{true},
-      projectionMatrix_{1} {};
-
 CameraNode::CameraNode(std::string const& name)
     : Node{name},
       isPerspective_{true},

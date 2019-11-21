@@ -9,10 +9,6 @@ class GeometryNode : public Node {
   model geometry_;
 
  public:
-  GeometryNode(std::string const& name,
-               std::string const& path,
-               std::int32_t& depth,
-               model const& geometry_model);
   GeometryNode(std::string const& name, model const& geometry_model);
 
   ~GeometryNode();

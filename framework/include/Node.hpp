@@ -13,7 +13,7 @@
 class Node {
  protected:
   Node* parent_;
-  std::list<std::shared_ptr<Node>> children_;
+  std::list<Node*> children_;
   std::string name_;
   std::string path_;
   int depth_;
@@ -21,16 +21,15 @@ class Node {
   glm::mat4 worldTransform_;
 
  public:
-  Node(std::string const& name, std::string const& path, std::int32_t& depth);
   Node(std::string const& name);
-
+  Node();
   ~Node();
 
   Node* getParent() const;
   void setParent(Node* parent);
 
-  std::shared_ptr<Node> getChild(std::string const& name) const;
-  std::list<std::shared_ptr<Node>> getChildrenList() const;
+  Node* getChild(std::string const& name) const;
+  std::list<Node*> getChildrenList() const;
 
   std::string getName() const;
   std::string getPath() const;
@@ -42,8 +41,8 @@ class Node {
   glm::mat4 getWorldTransform() const;
   void setWorldTransform(glm::mat4 const& inputMatrix);
 
-  void addChild(Node& node);
-  std::shared_ptr<Node> removeChild(std::string const& name);
+  void addChild(Node* node);
+  Node* removeChild(std::string const& name);
 };
 
 #endif  // NODE.HPP

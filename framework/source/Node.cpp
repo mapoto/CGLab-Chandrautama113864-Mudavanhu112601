@@ -1,14 +1,13 @@
-#include <Node.hpp>
-
-Node::Node(std::string const& name, std::string const& path, int& depth)
-    : name_{name}, path_{path}, depth_{depth} {};
-
-////////////////////////////////////////////////////////////////////////////////
+#include "Node.hpp"
 
 Node::Node(std::string const& name)
-    : name_{name},
-      depth_{getParent()->depth_++},
-      path_{getParent()->getPath() + "'\'" + name_} {};
+    : name_{name}, path_{"\\" + name_}, depth_{0} {}
+
+Node::Node() : name_{"name"}, path_{"\\" + name_}, depth_{0} {}
+
+Node::~Node() {}
+
+////////////////////////////////////////////////////////////////////////////////
 
 Node* Node::getParent() const {
   return parent_;
@@ -18,25 +17,25 @@ Node* Node::getParent() const {
 
 void Node::setParent(Node* parent) {
   parent_ = parent;
-  parent->addChild(*this);
-};
+  parent->addChild(this);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::shared_ptr<Node> Node::getChild(std::string const& name) const {
-  auto it = std::find_if(children_.begin(), children_.end(),
-                         [name](std::shared_ptr<Node> node) {
-                           if (node->getName() == name) {
-                             return node;
-                           };
-                         });
+Node* Node::getChild(std::string const& name) const {
+  auto it =
+      std::find_if(children_.begin(), children_.end(), [name](Node* node) {
+        if (node->getName() == name) {
+          return node;
+        };
+      });
 
   return *it;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::list<std::shared_ptr<Node>> Node::getChildrenList() const {
+std::list<Node*> Node::getChildrenList() const {
   return children_;
 }
 
@@ -54,13 +53,13 @@ std::string Node::getPath() const {
 
 int Node::getDepth() const {
   return depth_;
-};
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 glm::mat4 Node::getLocalTransform() const {
   return localTransform_;
-};
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -72,25 +71,30 @@ void Node::setLocalTransform(glm::mat4 const& inputMatrix) {
 
 glm::mat4 Node::getWorldTransform() const {
   return worldTransform_;
-};
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Node::setLocalTransform(glm::mat4 const& inputMatrix) {
+void Node::setWorldTransform(glm::mat4 const& inputMatrix) {
   worldTransform_ = inputMatrix;
-};
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Node::addChild(Node& node) {
-  children_.push_back(std::make_shared<Node>(node));
-  node.setParent(this);
-};
+void Node::addChild(Node* node) {
+  children_.push_back(node);
+  node->parent_ = this;
+  node->path_ = this->path_ + node->path_;
+
+  node->depth_ = this->depth_ + 1;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::shared_ptr<Node> Node::removeChild(std::string const& name) {
-  std::shared_ptr<Node> unwanted = getChild(name);
+Node* Node::removeChild(std::string const& name) {
+  Node* unwanted = getChild(name);
+
+  unwanted->path_ = "\\" + name;
   unwanted->setParent(nullptr);
 
   children_.remove(unwanted);

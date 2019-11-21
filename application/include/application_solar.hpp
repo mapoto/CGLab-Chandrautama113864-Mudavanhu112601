@@ -5,6 +5,10 @@
 #include "model.hpp"
 #include "structs.hpp"
 
+#include "CameraNode.hpp"
+#include "GeometryNode.hpp"
+#include "SceneGraph.hpp"
+
 // gpu representation of model
 class ApplicationSolar : public Application {
  public:
@@ -15,15 +19,21 @@ class ApplicationSolar : public Application {
 
   // react to key input
   void keyCallback(int key, int action, int mods);
-  //handle delta mouse movement input
+  // handle delta mouse movement input
   void mouseCallback(double pos_x, double pos_y);
-  //handle resizing
+  // handle resizing
   void resizeCallback(unsigned width, unsigned height);
 
   // draw all objects
   void render() const;
 
  protected:
+  void initializeSceneGraph();
+  void create_planet(SceneGraph& SceneGraph, std::string planet_name);
+
+  void create_moon_for_planet(SceneGraph& SceneGraph,
+                              std::string const& planet_name,
+                              std::string const& moon_name);
   void initializeShaderPrograms();
   void initializeGeometry();
   // update uniform values
@@ -33,9 +43,11 @@ class ApplicationSolar : public Application {
   // upload view matrix
   void uploadView();
 
+  void calculate_m_view_transform();
+
   // cpu representation of model
   model_object planet_object;
-  
+
   // camera transform matrix
   glm::fmat4 m_view_transform;
   // camera projection matrix

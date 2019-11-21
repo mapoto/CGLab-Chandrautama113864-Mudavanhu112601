@@ -10,7 +10,6 @@ class CameraNode : public Node {
   glm::mat4 projectionMatrix_;
 
  public:
-  CameraNode(std::string const& name, std::string const& path, int depth);
   CameraNode(std::string const& name);
 
   ~CameraNode();
