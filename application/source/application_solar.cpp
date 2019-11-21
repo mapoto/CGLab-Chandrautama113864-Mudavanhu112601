@@ -166,10 +166,11 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 int main(int argc, char* argv[]) {
   Application::run<ApplicationSolar>(argc, argv, 3, 2);
   
-  SceneGraph scene_0 = SceneGraph();
+  SceneGraph* scene_0 = SceneGraph::getInstance();
+  //std::shared_ptr<Node> root_scene_0 = scene_0->getRoot();
 
-  // std::shared_ptr<Node> root_scene_0 = scene_0->getRoot();
-
+  //std::cout<<root_scene_0->getName()<<std::endl;
+  //std::cout<<scene_0->getName()<<std::endl;
   // CameraNode cam = CameraNode{"camera_node"};
   // root_scene_0->addChild(cam);
 

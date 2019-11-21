@@ -5,26 +5,27 @@
 #include <string>
 
 class SceneGraph {
- private:
-  static SceneGraph* singletonSceneGraph;
+public:
+	static SceneGraph *getInstance(); 
 
-  std::shared_ptr<Node> root_;
-  std::string name_;
+private:
+	SceneGraph(){}
+	static SceneGraph* instance;
+};
 
-  void setName(std::string const& name);
-  void setRoot(std::shared_ptr<Node> const& root);
+SceneGraph* SceneGraph::instance = nullptr;
+SceneGraph* SceneGraph::getInstance() 
+{
+	if(!instance) {
+		instance = new SceneGraph();
+		std::cout << "getInstance(): First instance\n";
+		return instance;
+	}
+	else {
+		std::cout << "getInstance(): previous instance\n";
+		return instance;
+	}
 
-  SceneGraph();
-  ~SceneGraph();
-
- public:
-  static SceneGraph* getInstance();
-  SceneGraph();
-  ~SceneGraph();
-
-  std::string getName() const;
-  std::shared_ptr<Node> getRoot() const;
-  std::string printGraph() const;
 };
 
 #endif  // SCENEGRAPH_HPP
