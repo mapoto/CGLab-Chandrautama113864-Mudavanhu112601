@@ -4,6 +4,7 @@
 #include <Node.hpp>
 #include <model.hpp>
 
+
 class GeometryNode : public Node {
  private:
   model geometry_;
@@ -13,7 +14,7 @@ class GeometryNode : public Node {
 
   ~GeometryNode();
 
-  model getGeometry() const&;
+  model getGeometry() const;
   void setGeometry(model const& geometry_model);
 };
 

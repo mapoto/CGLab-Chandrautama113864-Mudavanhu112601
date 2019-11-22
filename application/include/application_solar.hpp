@@ -5,6 +5,7 @@
 #include "model.hpp"
 #include "structs.hpp"
 
+
 #include "CameraNode.hpp"
 #include "GeometryNode.hpp"
 #include "SceneGraph.hpp"
@@ -28,8 +29,8 @@ class ApplicationSolar : public Application {
   void render() const;
 
  protected:
-  void initializeSceneGraph();
-  void create_planet(SceneGraph& SceneGraph, std::string planet_name);
+  void create_scene_graph(model& planet_model);
+  void create_planet(SceneGraph& SceneGraph, std::string planet_name, model const& planet_model);
 
   void create_moon_for_planet(SceneGraph& SceneGraph,
                               std::string const& planet_name,

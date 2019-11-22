@@ -1,9 +1,9 @@
 #include <GeometryNode.hpp>
 
 GeometryNode::GeometryNode(std::string const& name, model const& geometry_model)
-    : Node{name}, geometry_{geometry_model} {};
+    : Node{name}, geometry_{geometry_model} {}
 
-model GeometryNode::getGeometry() const& {
+model GeometryNode::getGeometry() const {
   return geometry_;
 };
 

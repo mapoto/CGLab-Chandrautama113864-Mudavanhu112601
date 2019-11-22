@@ -27,7 +27,6 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
       m_view_projection{
           utils::calculate_projection_matrix(initial_aspect_ratio)} {
   calculate_m_view_transform();
-  initializeSceneGraph();
   initializeGeometry();
   initializeShaderPrograms();
 }
@@ -93,20 +92,20 @@ void ApplicationSolar::uploadUniforms() {
 
 ///////////////////////////// intialisation functions /////////////////////////
 
-void ApplicationSolar::initializeSceneGraph() {
+void ApplicationSolar::create_scene_graph(model& planet_model) {
   SceneGraph scene_0;
   Node root_node = Node{"root"};
 
   scene_0.setRoot(&root_node);
 
-  create_planet(scene_0, "holder_mercury");
-  create_planet(scene_0, "holder_venus");
-  create_planet(scene_0, "holder_earth");
-  create_planet(scene_0, "holder_mars");
-  create_planet(scene_0, "holder_jupiter");
-  create_planet(scene_0, "holder_saturn");
-  create_planet(scene_0, "holder_uranus");
-  create_planet(scene_0, "holder_neptune");
+  create_planet(scene_0, "holder_mercury", planet_model);
+  create_planet(scene_0, "holder_venus", planet_model);
+  create_planet(scene_0, "holder_earth", planet_model);
+  create_planet(scene_0, "holder_mars", planet_model);
+  create_planet(scene_0, "holder_jupiter", planet_model);
+  create_planet(scene_0, "holder_saturn", planet_model);
+  create_planet(scene_0, "holder_uranus", planet_model);
+  create_planet(scene_0, "holder_neptune", planet_model);
 
   create_moon_for_planet(scene_0, "holder_earth", "holder_moon");
 
@@ -115,9 +114,12 @@ void ApplicationSolar::initializeSceneGraph() {
 }
 
 void ApplicationSolar::create_planet(SceneGraph& SceneGraph,
-                                     std::string planet_name) {
+                                     std::string planet_name, model const& planet_model) {
   Node* planet = new Node{planet_name};
   SceneGraph.getRoot()->addChild(planet);
+
+  GeometryNode* geometry = new GeometryNode{"geometry_"+planet_name, planet_model};
+  planet->addChild(geometry);
 }
 
 void ApplicationSolar::create_moon_for_planet(SceneGraph& SceneGraph,
@@ -188,6 +190,9 @@ void ApplicationSolar::initializeGeometry() {
   planet_object.draw_mode = GL_TRIANGLES;
   // transfer number of indices to model object
   planet_object.num_elements = GLsizei(planet_model.indices.size());
+
+  create_scene_graph(planet_model);
+
 }
 
 ///////////////////////////// callback functions for window events ////////////
@@ -222,13 +227,4 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 // exe entry point
 int main(int argc, char* argv[]) {
   Application::run<ApplicationSolar>(argc, argv, 3, 2);
-
-  // GeometryNode geo_mercury = GeometryNode{"geo_mercury", };
-  // GeometryNode geo_venus = GeometryNode{"geo_venus", };
-  // GeometryNode geo_earth = GeometryNode{"geo_earth", };
-  // GeometryNode geo_mars = GeometryNode{"geo_mars", };
-  // GeometryNode geo_jupiter = GeometryNode{"geo_jupiter", };
-  // GeometryNode geo_saturn = GeometryNode{"geo_saturn", };
-  // GeometryNode geo_uranus = GeometryNode{"geo_uranus", };
-  // GeometryNode geo_neptune = GeometryNode{"geo_neptune", };
 }

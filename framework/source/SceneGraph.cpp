@@ -26,20 +26,18 @@ Node* SceneGraph::getRoot() const {
 
 std::string SceneGraph::printGraph() const {
   std::string from_root = getRoot()->getName();
+  auto const list = getRoot()->getChildrenList();
 
-  // std::for_each(getRoot()->getChildrenList().begin(),
-  //               getRoot()->getChildrenList().end(),
-  //               [&](Node* n) { from_root += ("\n \t" + n->getName()); });
+  for (auto it = list.begin(); it != list.end(); it++) {
+    from_root += ("\n |_" + (*it)->getName());
 
-  // for (auto it = getRoot()->getChildrenList().begin();
-  //      it != getRoot()->getChildrenList().end(); it++) {
-  //   from_root += "\n \t" + (*it)->getName();
-
-  //   for (auto a = (*it)->getChildrenList().begin();
-  //        a != (*it)->getChildrenList().end(); a++) {
-  //     from_root += "\n \t" + (*a)->getName();
-  //   }
-  // }
+    auto const list2 = (*it)->getChildrenList();
+    if (!list2.empty()) {
+      for (auto it2 = list2.begin(); it2 != list2.end(); it2++) {
+        from_root += ("\n  |_" + (*it2)->getName());
+      }
+    }
+  }
 
   return from_root;
 }
