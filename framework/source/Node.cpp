@@ -4,29 +4,31 @@ Node::Node(std::string const& name)
     : name_{name}, path_{"\\" + name_}, depth_{0} {
   localTransform_ = glm::fmat4{};
   worldTransform_ = glm::fmat4{};
+  parent_ = nullptr;
 }
 
 Node::Node() : name_{"name"}, path_{"\\" + name_}, depth_{0} {
   localTransform_ = glm::fmat4{};
   worldTransform_ = glm::fmat4{};
+  parent_ = nullptr;
 }
 
 Node::~Node() {
-  //clear connection between this node and its parent if it has one
+  // clear connection between this node and its parent if it has one
   if (parent_ != nullptr) {
-    //remove this node from its parent list
+    // remove this node from its parent list
     parent_->removeChild(name_);
-    //set the parent as nullptr
+    // set the parent as nullptr
     parent_ = nullptr;
   }
 
-  //clear connection between this node and its children if exist
+  // clear connection between this node and its children if exist
   if (!children_.empty()) {
-    //set the parent of every children as nullptr 
+    // set the parent of every children as nullptr
     for (auto child : children_) {
       child->parent_ = nullptr;
     }
-    //clear this node list of children
+    // clear this node list of children
     children_.clear();
   }
 }
@@ -46,14 +48,16 @@ void Node::setParent(Node* parent) {
 ////////////////////////////////////////////////////////////////////////////////
 
 Node* Node::getChild(std::string const& name) const {
-  auto it =
-      std::find_if(children_.begin(), children_.end(), [name](Node* node) {
-        if (node->getName() == name) {
-          return node;
-        };
-      });
+  if (!children_.empty()) {
+    auto it =
+        std::find_if(children_.cbegin(), children_.cend(),
+                     [&](Node* const node) { return node->getName() == name; });
+    if (it != children_.end()) {
+      return *it;
+    }
+  }
 
-  return *(it);
+  return nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,10 +109,10 @@ void Node::setWorldTransform(glm::mat4 const& inputMatrix) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Node::addChild(Node* node) {
-  //push the child node to the list
+  // push the child node to the list
   children_.push_back(node);
 
-  //set its depth and path based on this node as its parent
+  // set its depth and path based on this node as its parent
   node->path_ = this->path_ + node->path_;
   node->depth_ = this->depth_ + 1;
   node->parent_ = this;

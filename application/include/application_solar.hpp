@@ -40,9 +40,8 @@ class ApplicationSolar : public Application {
 
  private:
   void create_camera(std::string const& camera_name);
-  void create_planet(std::string const& planet_name,
-                     model const& planet_model,
-                     glm::fvec3 const& distance);
+  void create_sun(std::string const& sun_name, model const& sun_model);
+  void create_planet(std::string const& planet_name, model const& planet_model);
 
   void create_moon_for_planet(std::string const& planet_name,
                               std::string const& moon_name);

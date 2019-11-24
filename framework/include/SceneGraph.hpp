@@ -3,8 +3,11 @@
 
 #include <memory>
 #include <string>
+
+//include all useful nodes
 #include "CameraNode.hpp"
 #include "GeometryNode.hpp"
+#include "PointLightNode.hpp"
 
 class SceneGraph {
  public:

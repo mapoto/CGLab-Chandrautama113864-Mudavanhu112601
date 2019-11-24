@@ -42,7 +42,7 @@ void ApplicationSolar::render() const {
   auto const solar_system = scene_graph.getRoot()->getChildrenList();
 
   // initial distance
-  glm::fvec3 distance = glm::fvec3{1.0f, 0.0f, 0.0f};
+  glm::fvec3 distance = glm::fvec3{0.0f, 0.0f, 0.0f};
 
   // a pivot for planets' revolution = sun's world_matrix
   glm::fmat4 const solar_system_origin =
@@ -50,36 +50,67 @@ void ApplicationSolar::render() const {
 
   // loop through all elements below the root
   for (auto const planet : solar_system) {
-    
     // ignore rendering the camera
     if (planet->getName() != "camera") {
-      
-      // calculate the planet's matrix when it's translated to the correct distance from the root.
+      // calculate the planet's matrix when it's translated to the correct
+      // distance from the root.
       glm::fmat4 orbit = glm::translate(planet->getWorldTransform(), distance);
-      
+
       // get the rotation with respect to the origin of the solar system
       orbit = glm::rotate(solar_system_origin, float(glfwGetTime()),
                           glm::fvec3{0.0f, 1.0f, 0.0f});
-      
+
       // allow it move along its orbit
       orbit = glm::translate(orbit, distance);
-      
+
+      if (planet->getName() == "holder_sun") {
+        orbit = glm::scale(orbit, glm::fvec3{1.8f});
+      }
+
       // set the orbit as the planet world transform
       planet->setWorldTransform(orbit);
 
-      // use it to get the image
+      // use it to get the image for this frame
       render_planet(planet);
 
-      distance += glm::fvec3{2.0f, 0.0f, 0.0f};
+      // lazy increment for the next planet
+      distance += glm::fvec3{4.0f, 0.0f, 0.0f};
+      auto moons = planet->getChildrenList();
+      if (!moons.empty()) {
+        glm::fvec3 moon_distance_from_planet = glm::fvec3{2.0f, 0.0f, 0.0f};
+        glm::fvec3 moon_size = glm::fvec3{0.5f};
+
+        for (auto moon : moons) {
+          if (moon->getName() == "holder_moon") {
+            glm::fmat4 moon_orbit = glm::translate(
+                moon->getWorldTransform() * planet->getWorldTransform(),
+                moon_distance_from_planet);
+
+            // get the rotation with respect to the origin of the solar system
+            moon_orbit =
+                glm::rotate(planet->getWorldTransform(), float(glfwGetTime()),
+                            glm::fvec3{0.0f, 1.0f, 0.0f});
+
+            // allow it move along its orbit
+            moon_orbit = glm::translate(moon_orbit, moon_distance_from_planet);
+
+            moon_orbit = glm::scale(moon_orbit, moon_size);
+
+            moon->setWorldTransform(moon_orbit);
+
+            render_planet(moon);
+          }
+        }
+      }
     }
   }
 }
-
 
 void ApplicationSolar::render_planet(Node* planet) const {
   // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
 
+  // get the planet matrix at this frame
   glm::fmat4 model_matrix = planet->getWorldTransform();
 
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"), 1,
@@ -135,17 +166,20 @@ void ApplicationSolar::initialize_scene_graph() {
 
   Node* root_node = new Node{"root"};
   scene_graph.setRoot(root_node);
-  create_camera("camera");
-  create_planet("holder_mercury", planet_model, glm::fvec3{0.0f, 0.0f, 0.0f});
-  create_planet("holder_venus", planet_model, glm::fvec3{3.0f, 0.0f, 0.0f});
-  create_planet("holder_earth", planet_model, glm::fvec3{5.0f, 0.0f, 0.0f});
-  create_planet("holder_mars", planet_model, glm::fvec3{7.0f, 0.0f, 0.0f});
-  create_planet("holder_jupiter", planet_model, glm::fvec3{9.0f, 0.0f, 0.0f});
-  create_planet("holder_saturn", planet_model, glm::fvec3{11.0f, 0.0f, 0.0f});
-  create_planet("holder_uranus", planet_model, glm::fvec3{13.0f, 0.0f, 0.0f});
-  create_planet("holder_neptune", planet_model, glm::fvec3{15.0f, 0.0f, 0.0f});
+  scene_graph.setName("scene_graph_1");
 
-  // create_moon_for_planet("holder_earth", "holder_moon");
+  create_camera("camera");
+  create_sun("holder_sun", planet_model);
+  create_planet("holder_mercury", planet_model);
+  create_planet("holder_venus", planet_model);
+  create_planet("holder_earth", planet_model);
+  create_planet("holder_mars", planet_model);
+  create_planet("holder_jupiter", planet_model);
+  create_planet("holder_saturn", planet_model);
+  create_planet("holder_uranus", planet_model);
+  create_planet("holder_neptune", planet_model);
+
+  create_moon_for_planet("holder_earth", "holder_moon");
 
   std::cout << scene_graph.printGraph() << std::endl;
 }
@@ -161,7 +195,7 @@ void ApplicationSolar::create_camera(std::string const& camera_name) {
   auto cam_local_matrix = cam->getLocalTransform();
 
   cam_world_matrix =
-      glm::translate(cam_world_matrix, glm::fvec3{0.0f, 15.0f, 0.0F});
+      glm::translate(cam_world_matrix, glm::fvec3{0.0f, 50.0f, 0.0F});
   cam_world_matrix =
       glm::rotate(cam_world_matrix, 3.14f / 2, glm::vec3{-1.0f, 0.0f, 0.0f});
   cam->setWorldTransform(cam_world_matrix);
@@ -169,11 +203,19 @@ void ApplicationSolar::create_camera(std::string const& camera_name) {
   glm::fmat4 model_matrix_cam = cam_world_matrix * cam_local_matrix;
 
   set_m_view_transform(model_matrix_cam);
-};
+}
+
+void ApplicationSolar::create_sun(std::string const& sun_name,
+                                  model const& sun_model) {
+  Node* sun_holder = new Node{sun_name};
+  GeometryNode* sun_geometry =
+      new GeometryNode{"geometry_" + sun_name, sun_model};
+  scene_graph.getRoot()->addChild(sun_holder);
+  sun_holder->addChild(sun_geometry);
+}
 
 void ApplicationSolar::create_planet(std::string const& planet_name,
-                                     model const& planet_model,
-                                     glm::fvec3 const& distance) {
+                                     model const& planet_model) {
   Node* planet = new Node{planet_name};
   scene_graph.getRoot()->addChild(planet);
 
@@ -181,23 +223,15 @@ void ApplicationSolar::create_planet(std::string const& planet_name,
       new GeometryNode{"geometry_" + planet_name, planet_model};
 
   planet->addChild(geometry);
-
-  auto planet_world_matrix =
-      planet->getWorldTransform() * planet->getLocalTransform();
-  planet_world_matrix = glm::translate(planet_world_matrix, distance);
-  planet->setWorldTransform(planet_world_matrix);
-
-  // planet->setWorldTransform(
-  //     planet->getLocalTransform() *
-  //     glm::translate(planet->getWorldTransform(), distance));
 }
 
 void ApplicationSolar::create_moon_for_planet(std::string const& planet_name,
                                               std::string const& moon_name) {
-  auto wanted_planet = scene_graph.getRoot()->getChild(planet_name);
+  auto wanted_planet = (scene_graph.getRoot())->getChild(planet_name);
   Node* moon = new Node{moon_name};
-
-  wanted_planet->addChild(moon);
+  if (wanted_planet != nullptr) {
+    wanted_planet->addChild(moon);
+  }
 }
 
 // load shader sources
