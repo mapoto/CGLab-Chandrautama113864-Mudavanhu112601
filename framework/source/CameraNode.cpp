@@ -6,6 +6,9 @@ CameraNode::CameraNode(std::string const& name)
       isEnabled_{true},
       projectionMatrix_{1} {};
 
+CameraNode::~CameraNode(){
+};
+
 bool CameraNode::getPerspective() const {
   return isPerspective_;
 };

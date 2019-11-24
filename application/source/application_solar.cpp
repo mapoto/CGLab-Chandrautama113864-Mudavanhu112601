@@ -22,12 +22,12 @@ using namespace gl;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
     : Application{resource_path},
+      scene_graph{},
       planet_object{},
       m_view_transform{},
       m_view_projection{
           utils::calculate_projection_matrix(initial_aspect_ratio)} {
-  calculate_m_view_transform();
-  initializeGeometry();
+  initialize_scene_graph();
   initializeShaderPrograms();
 }
 
@@ -38,12 +38,50 @@ ApplicationSolar::~ApplicationSolar() {
 }
 
 void ApplicationSolar::render() const {
+  // list of nodes in graph below the root including sun, camera and planets
+  auto const solar_system = scene_graph.getRoot()->getChildrenList();
+
+  // initial distance
+  glm::fvec3 distance = glm::fvec3{1.0f, 0.0f, 0.0f};
+
+  // a pivot for planets' revolution = sun's world_matrix
+  glm::fmat4 const solar_system_origin =
+      scene_graph.getRoot()->getWorldTransform();
+
+  // loop through all elements below the root
+  for (auto const planet : solar_system) {
+    
+    // ignore rendering the camera
+    if (planet->getName() != "camera") {
+      
+      // calculate the planet's matrix when it's translated to the correct distance from the root.
+      glm::fmat4 orbit = glm::translate(planet->getWorldTransform(), distance);
+      
+      // get the rotation with respect to the origin of the solar system
+      orbit = glm::rotate(solar_system_origin, float(glfwGetTime()),
+                          glm::fvec3{0.0f, 1.0f, 0.0f});
+      
+      // allow it move along its orbit
+      orbit = glm::translate(orbit, distance);
+      
+      // set the orbit as the planet world transform
+      planet->setWorldTransform(orbit);
+
+      // use it to get the image
+      render_planet(planet);
+
+      distance += glm::fvec3{2.0f, 0.0f, 0.0f};
+    }
+  }
+}
+
+
+void ApplicationSolar::render_planet(Node* planet) const {
   // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
 
-  glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()),
-                                        glm::fvec3{0.0f, 1.0f, 0.0f});
-  model_matrix = glm::translate(model_matrix, glm::fvec3{0.0f, 0.0f, -1.0f});
+  glm::fmat4 model_matrix = planet->getWorldTransform();
+
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"), 1,
                      GL_FALSE, glm::value_ptr(model_matrix));
 
@@ -61,9 +99,8 @@ void ApplicationSolar::render() const {
                  model::INDEX.type, NULL);
 }
 
-void ApplicationSolar::calculate_m_view_transform() {
-  m_view_transform = glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 8.0f, 10.0f});
-  m_view_transform = glm::rotate(m_view_transform, 3.14f/8, glm::vec3{-1.0f,0.0f,0.0f});
+void ApplicationSolar::set_m_view_transform(glm::fmat4 const& cam_matrix) {
+  m_view_transform = cam_matrix;
 }
 
 void ApplicationSolar::uploadView() {
@@ -85,47 +122,79 @@ void ApplicationSolar::uploadProjection() {
 void ApplicationSolar::uploadUniforms() {
   // bind shader to which to upload unforms
   glUseProgram(m_shaders.at("planet").handle);
-  // upload uniform values to new locations
+  // upload uniform values to std::make_shared< loca>(ions
   uploadView();
   uploadProjection();
 }
 
 ///////////////////////////// intialisation functions /////////////////////////
 
-void ApplicationSolar::create_scene_graph(model& planet_model) {
-  SceneGraph scene_0;
-  Node root_node = Node{"root"};
+void ApplicationSolar::initialize_scene_graph() {
+  model planet_model;
+  initializeGeometry(planet_model);
 
-  scene_0.setRoot(&root_node);
+  Node* root_node = new Node{"root"};
+  scene_graph.setRoot(root_node);
+  create_camera("camera");
+  create_planet("holder_mercury", planet_model, glm::fvec3{0.0f, 0.0f, 0.0f});
+  create_planet("holder_venus", planet_model, glm::fvec3{3.0f, 0.0f, 0.0f});
+  create_planet("holder_earth", planet_model, glm::fvec3{5.0f, 0.0f, 0.0f});
+  create_planet("holder_mars", planet_model, glm::fvec3{7.0f, 0.0f, 0.0f});
+  create_planet("holder_jupiter", planet_model, glm::fvec3{9.0f, 0.0f, 0.0f});
+  create_planet("holder_saturn", planet_model, glm::fvec3{11.0f, 0.0f, 0.0f});
+  create_planet("holder_uranus", planet_model, glm::fvec3{13.0f, 0.0f, 0.0f});
+  create_planet("holder_neptune", planet_model, glm::fvec3{15.0f, 0.0f, 0.0f});
 
-  create_planet(scene_0, "holder_mercury", planet_model);
-  create_planet(scene_0, "holder_venus", planet_model);
-  create_planet(scene_0, "holder_earth", planet_model);
-  create_planet(scene_0, "holder_mars", planet_model);
-  create_planet(scene_0, "holder_jupiter", planet_model);
-  create_planet(scene_0, "holder_saturn", planet_model);
-  create_planet(scene_0, "holder_uranus", planet_model);
-  create_planet(scene_0, "holder_neptune", planet_model);
+  // create_moon_for_planet("holder_earth", "holder_moon");
 
-  create_moon_for_planet(scene_0, "holder_earth", "holder_moon");
-
-  std::cout << scene_0.printGraph() << std::endl;
-
+  std::cout << scene_graph.printGraph() << std::endl;
 }
 
-void ApplicationSolar::create_planet(SceneGraph& SceneGraph,
-                                     std::string planet_name, model const& planet_model) {
+void ApplicationSolar::create_camera(std::string const& camera_name) {
+  CameraNode* cam = new CameraNode{camera_name};
+  cam->setEnabled(true);
+  cam->setPerspective(true);
+
+  scene_graph.getRoot()->addChild(cam);
+
+  auto cam_world_matrix = cam->getWorldTransform();
+  auto cam_local_matrix = cam->getLocalTransform();
+
+  cam_world_matrix =
+      glm::translate(cam_world_matrix, glm::fvec3{0.0f, 15.0f, 0.0F});
+  cam_world_matrix =
+      glm::rotate(cam_world_matrix, 3.14f / 2, glm::vec3{-1.0f, 0.0f, 0.0f});
+  cam->setWorldTransform(cam_world_matrix);
+
+  glm::fmat4 model_matrix_cam = cam_world_matrix * cam_local_matrix;
+
+  set_m_view_transform(model_matrix_cam);
+};
+
+void ApplicationSolar::create_planet(std::string const& planet_name,
+                                     model const& planet_model,
+                                     glm::fvec3 const& distance) {
   Node* planet = new Node{planet_name};
-  SceneGraph.getRoot()->addChild(planet);
+  scene_graph.getRoot()->addChild(planet);
 
-  GeometryNode* geometry = new GeometryNode{"geometry_"+planet_name, planet_model};
+  GeometryNode* geometry =
+      new GeometryNode{"geometry_" + planet_name, planet_model};
+
   planet->addChild(geometry);
+
+  auto planet_world_matrix =
+      planet->getWorldTransform() * planet->getLocalTransform();
+  planet_world_matrix = glm::translate(planet_world_matrix, distance);
+  planet->setWorldTransform(planet_world_matrix);
+
+  // planet->setWorldTransform(
+  //     planet->getLocalTransform() *
+  //     glm::translate(planet->getWorldTransform(), distance));
 }
 
-void ApplicationSolar::create_moon_for_planet(SceneGraph& SceneGraph,
-                                              std::string const& planet_name,
+void ApplicationSolar::create_moon_for_planet(std::string const& planet_name,
                                               std::string const& moon_name) {
-  auto wanted_planet = SceneGraph.getRoot()->getChild(planet_name);
+  auto wanted_planet = scene_graph.getRoot()->getChild(planet_name);
   Node* moon = new Node{moon_name};
 
   wanted_planet->addChild(moon);
@@ -147,8 +216,8 @@ void ApplicationSolar::initializeShaderPrograms() {
 }
 
 // load models
-void ApplicationSolar::initializeGeometry() {
-  model planet_model =
+void ApplicationSolar::initializeGeometry(model& planet_model) {
+  planet_model =
       model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
 
   // generate vertex array object
@@ -190,9 +259,6 @@ void ApplicationSolar::initializeGeometry() {
   planet_object.draw_mode = GL_TRIANGLES;
   // transfer number of indices to model object
   planet_object.num_elements = GLsizei(planet_model.indices.size());
-
-  create_scene_graph(planet_model);
-
 }
 
 ///////////////////////////// callback functions for window events ////////////
@@ -217,10 +283,10 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
 
 // handle resizing
 void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
-  // recalculate projection matrix for new aspect ration
+  // recalculate projection matrix for std::make_shared< aspe>(t ration
   m_view_projection =
       utils::calculate_projection_matrix(float(width) / float(height));
-  // upload new projection matrix
+  // upload std::make_shared< proj>(ction matrix
   uploadProjection();
 }
 

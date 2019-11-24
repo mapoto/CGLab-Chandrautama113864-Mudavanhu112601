@@ -1,14 +1,10 @@
 #ifndef APPLICATION_SOLAR_HPP
 #define APPLICATION_SOLAR_HPP
 
+#include "SceneGraph.hpp"
 #include "application.hpp"
 #include "model.hpp"
 #include "structs.hpp"
-
-
-#include "CameraNode.hpp"
-#include "GeometryNode.hpp"
-#include "SceneGraph.hpp"
 
 // gpu representation of model
 class ApplicationSolar : public Application {
@@ -29,14 +25,10 @@ class ApplicationSolar : public Application {
   void render() const;
 
  protected:
-  void create_scene_graph(model& planet_model);
-  void create_planet(SceneGraph& SceneGraph, std::string planet_name, model const& planet_model);
-
-  void create_moon_for_planet(SceneGraph& SceneGraph,
-                              std::string const& planet_name,
-                              std::string const& moon_name);
+  void initialize_scene_graph();
   void initializeShaderPrograms();
-  void initializeGeometry();
+  void initializeGeometry(model& planet_model);
+
   // update uniform values
   void uploadUniforms();
   // upload projection matrix
@@ -44,7 +36,22 @@ class ApplicationSolar : public Application {
   // upload view matrix
   void uploadView();
 
-  void calculate_m_view_transform();
+  void set_m_view_transform(glm::fmat4 const& cam_matrix);
+
+ private:
+  void create_camera(std::string const& camera_name);
+  void create_planet(std::string const& planet_name,
+                     model const& planet_model,
+                     glm::fvec3 const& distance);
+
+  void create_moon_for_planet(std::string const& planet_name,
+                              std::string const& moon_name);
+
+  void render_scene() const;
+
+  void render_planet(Node* planet) const;
+
+  SceneGraph scene_graph;
 
   // cpu representation of model
   model_object planet_object;
