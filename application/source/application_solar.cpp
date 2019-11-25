@@ -60,18 +60,12 @@ void ApplicationSolar::render_scene(
   for (auto planet : sol) {
     // ignore rendering the camera
     if (planet->getName() != "camera") {
-      
       // calculate the matrix of each planet
       process_planet_matrix(planet, distance, solar_system_origin,
                             planet_rotation_speed_factor);
 
       // use it to get the image for this frame
-      render_node
-    (planet);
-
-      // lazy increment for the next planet
-      distance += glm::fvec3{4.0f, 0.0f, 0.0f};
-      ++planet_rotation_speed_factor;
+      render_node(planet);
 
       auto moons = planet->getChildrenList();
 
@@ -83,11 +77,14 @@ void ApplicationSolar::render_scene(
           if (moon->getName() == "holder_moon") {
             process_moon_matrix(moon, planet, moon_distance_from_planet,
                                 moon_size);
-            render_node
-          (moon);
+            render_node(moon);
           }
         }
       }
+
+      // lazy increment for the next planet
+      distance += glm::fvec3{4.0f, 0.0f, 0.0f};
+      ++planet_rotation_speed_factor;
     }
   }
 }
@@ -103,11 +100,14 @@ void ApplicationSolar::process_planet_matrix(
       glm::translate(planet->getWorldTransform(), distance);
 
   // get the rotation with respect to the origin of the solar system
-  planet_matrix = glm::rotate(solar_system_origin,
-                              float(1.5f * glfwGetTime() / speed_factor),
-                              glm::fvec3{0.0f, 1.0f, 0.0f});
+  planet_matrix =
+      glm::rotate(solar_system_origin, float(4 * glfwGetTime() / speed_factor),
+                  glm::fvec3{0.0f, 1.0f, 0.0f});
 
-  // allow it move along its orbit
+  planet->getChildrenList().front()->setWorldTransform(glm::rotate(
+      glm::fmat4{}, float(glfwGetTime()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+
+  // allow it move along its orbit to allow planet's revolution around the sun
   planet_matrix = glm::translate(planet_matrix, distance);
 
   if (planet->getName() == "holder_sun") {
@@ -333,19 +333,37 @@ void ApplicationSolar::initializeGeometry(model& planet_model) {
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
   if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
-        glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -0.1f});
+        glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -5.0f});
     uploadView();
+    std::cout << "key w pressed: camera forward" << std::endl;
   } else if (key == GLFW_KEY_S &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
-        glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 0.1f});
+        glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 5.0f});
     uploadView();
+    std::cout << "key s pressed: camera backward" << std::endl;
+  } else if (key == GLFW_KEY_A &&
+             (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform =
+        glm::translate(m_view_transform, glm::fvec3{5.0f, 0.0f, 0.0f});
+    uploadView();
+    std::cout << "key s pressed: camera backward" << std::endl;
+  } else if (key == GLFW_KEY_D &&
+             (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform =
+        glm::translate(m_view_transform, glm::fvec3{-5.0f, 0.0f, 0.0f});
+    uploadView();
+    std::cout << "key s pressed: camera backward" << std::endl;
   }
 }
 
 // handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   // mouse handling
+  std::cout << pos_x << ":" << pos_y << std::endl;
+  m_view_transform =
+      glm::rotate(m_view_transform, 0.1f, glm::vec3{pos_y, pos_x, 0.0f});
+  uploadView();
 }
 
 // handle resizing

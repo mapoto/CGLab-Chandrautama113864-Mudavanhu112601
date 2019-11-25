@@ -24,7 +24,7 @@ class SceneGraph {
  private:
   Node* root_;
   std::string name_;
-  // static SceneGraph* instance;
+  //static SceneGraph* instance;
 };
 
 #endif  // SCENEGRAPH_HPP
