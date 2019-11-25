@@ -48,57 +48,43 @@ void ApplicationSolar::render() const {
   glm::fmat4 const solar_system_origin =
       scene_graph.getRoot()->getWorldTransform();
 
+  render_scene(solar_system, distance, solar_system_origin);
+}
+
+void ApplicationSolar::render_scene(
+    std::list<Node*> const& sol,
+    glm::fvec3& distance,
+    glm::fmat4 const& solar_system_origin) const {
+  int planet_rotation_speed_factor = 1;
   // loop through all elements below the root
-  for (auto const planet : solar_system) {
+  for (auto planet : sol) {
     // ignore rendering the camera
     if (planet->getName() != "camera") {
-      // calculate the planet's matrix when it's translated to the correct
-      // distance from the root.
-      glm::fmat4 orbit = glm::translate(planet->getWorldTransform(), distance);
-
-      // get the rotation with respect to the origin of the solar system
-      orbit = glm::rotate(solar_system_origin, float(glfwGetTime()),
-                          glm::fvec3{0.0f, 1.0f, 0.0f});
-
-      // allow it move along its orbit
-      orbit = glm::translate(orbit, distance);
-
-      if (planet->getName() == "holder_sun") {
-        orbit = glm::scale(orbit, glm::fvec3{1.8f});
-      }
-
-      // set the orbit as the planet world transform
-      planet->setWorldTransform(orbit);
+      
+      // calculate the matrix of each planet
+      process_planet_matrix(planet, distance, solar_system_origin,
+                            planet_rotation_speed_factor);
 
       // use it to get the image for this frame
-      render_planet(planet);
+      render_node
+    (planet);
 
       // lazy increment for the next planet
       distance += glm::fvec3{4.0f, 0.0f, 0.0f};
+      ++planet_rotation_speed_factor;
+
       auto moons = planet->getChildrenList();
+
       if (!moons.empty()) {
         glm::fvec3 moon_distance_from_planet = glm::fvec3{2.0f, 0.0f, 0.0f};
         glm::fvec3 moon_size = glm::fvec3{0.5f};
 
         for (auto moon : moons) {
           if (moon->getName() == "holder_moon") {
-            glm::fmat4 moon_orbit = glm::translate(
-                moon->getWorldTransform() * planet->getWorldTransform(),
-                moon_distance_from_planet);
-
-            // get the rotation with respect to the origin of the solar system
-            moon_orbit =
-                glm::rotate(planet->getWorldTransform(), float(glfwGetTime()),
-                            glm::fvec3{0.0f, 1.0f, 0.0f});
-
-            // allow it move along its orbit
-            moon_orbit = glm::translate(moon_orbit, moon_distance_from_planet);
-
-            moon_orbit = glm::scale(moon_orbit, moon_size);
-
-            moon->setWorldTransform(moon_orbit);
-
-            render_planet(moon);
+            process_moon_matrix(moon, planet, moon_distance_from_planet,
+                                moon_size);
+            render_node
+          (moon);
           }
         }
       }
@@ -106,7 +92,54 @@ void ApplicationSolar::render() const {
   }
 }
 
-void ApplicationSolar::render_planet(Node* planet) const {
+void ApplicationSolar::process_planet_matrix(
+    Node* planet,
+    glm::fvec3& distance,
+    glm::fmat4 const& solar_system_origin,
+    int speed_factor) const {
+  // calculate the planet's matrix when it's translated to the correct
+  // distance from the root.
+  glm::fmat4 planet_matrix =
+      glm::translate(planet->getWorldTransform(), distance);
+
+  // get the rotation with respect to the origin of the solar system
+  planet_matrix = glm::rotate(solar_system_origin,
+                              float(1.5f * glfwGetTime() / speed_factor),
+                              glm::fvec3{0.0f, 1.0f, 0.0f});
+
+  // allow it move along its orbit
+  planet_matrix = glm::translate(planet_matrix, distance);
+
+  if (planet->getName() == "holder_sun") {
+    planet_matrix = glm::scale(planet_matrix, glm::fvec3{1.8f});
+  }
+
+  // set the orbit as the planet world transform
+  planet->setWorldTransform(planet_matrix);
+}
+
+void ApplicationSolar::process_moon_matrix(
+    Node* moon,
+    Node* planet,
+    glm::fvec3 const& distance_from_planet,
+    glm::fvec3 const& moon_size) const {
+  glm::fmat4 moon_matrix =
+      glm::translate(moon->getWorldTransform() * planet->getWorldTransform(),
+                     distance_from_planet);
+
+  // get the rotation with respect to the origin of the solar system
+  moon_matrix = glm::rotate(planet->getWorldTransform(), float(glfwGetTime()),
+                            glm::fvec3{0.0f, 1.0f, 0.0f});
+
+  // allow it move along its orbit
+  moon_matrix = glm::translate(moon_matrix, distance_from_planet);
+
+  moon_matrix = glm::scale(moon_matrix, moon_size);
+
+  moon->setWorldTransform(moon_matrix);
+}
+
+void ApplicationSolar::render_node(Node* planet) const {
   // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
 

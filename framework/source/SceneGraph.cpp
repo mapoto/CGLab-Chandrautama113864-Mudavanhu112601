@@ -1,7 +1,12 @@
 #include <SceneGraph.hpp>
+// SceneGraph* SceneGraph::instance = nullptr;
 
 SceneGraph::SceneGraph() {
   root_ = nullptr;
+  // if (instance != nullptr) {
+  //   root_ = instance->root_;
+  //   name_ = instance->name_;
+  // }
 }
 
 SceneGraph::~SceneGraph() {

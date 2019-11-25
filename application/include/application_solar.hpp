@@ -46,9 +46,21 @@ class ApplicationSolar : public Application {
   void create_moon_for_planet(std::string const& planet_name,
                               std::string const& moon_name);
 
-  void render_scene() const;
+  void process_planet_matrix(Node* planet,
+                             glm::fvec3& distance,
+                             glm::fmat4 const& solar_system_origin,
+                             int speed_factor) const;
+  
+  void process_moon_matrix(Node* moon,
+                           Node* planet,
+                           glm::fvec3 const& distance_from_planet,
+                           glm::fvec3 const& moon_size) const;
 
-  void render_planet(Node* planet) const;
+  void render_scene(std::list<Node*> const& sol,
+                    glm::fvec3& distance,
+                    glm::fmat4 const& solar_system_origin) const;
+
+  void render_node(Node* planet) const;
 
   SceneGraph scene_graph;
 
