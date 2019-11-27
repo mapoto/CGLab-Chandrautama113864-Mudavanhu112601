@@ -44,7 +44,8 @@ class ApplicationSolar : public Application {
   void create_planet(std::string const& planet_name, model const& planet_model);
 
   void create_moon_for_planet(std::string const& planet_name,
-                              std::string const& moon_name);
+                              std::string const& moon_name,
+                              model const& moon_model);
 
   void process_planet_matrix(Node* planet,
                              glm::fvec3& distance,
