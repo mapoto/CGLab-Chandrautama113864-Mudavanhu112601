@@ -220,7 +220,7 @@ void ApplicationSolar::initialize_scene_graph() {
   create_planet("holder_neptune", planet_model);
 
   // find earth and attach the moon
-  create_moon_for_planet("holder_earth", "holder_moon");
+  create_moon_for_planet("holder_earth", "holder_moon", planet_model);
 
   // print the graph structure
   std::cout << scene_graph.printGraph() << std::endl;
