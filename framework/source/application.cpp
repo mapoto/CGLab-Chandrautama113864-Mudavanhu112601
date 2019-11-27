@@ -12,16 +12,20 @@ using namespace gl;
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+//Used for updating the Shaders of the program
 static void update_shader_programs(std::map<std::string, shader_program>& shaders, bool throwing);
 
+//Used to set the Intial Resolution of the Application Window 
 const glm::uvec2 Application::initial_resolution = {640u, 480u};
 const float Application::initial_aspect_ratio = float(initial_resolution.x) / float(initial_resolution.y);
 
+//Used to call the Shaders and the Path of the resources needed to Run the Application
 Application::Application(std::string const& resource_path)
  :m_resource_path{resource_path}
  ,m_shaders{}
 {}
 
+//The Destructor that is used to free the Resourses used when the Application is running e.g Shaders
 Application::~Application() {
   // free all shader program objects
   for (auto const& pair : m_shaders) {

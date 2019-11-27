@@ -139,6 +139,7 @@ void Node::addChild(Node* node) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//Function for deleting a Node from the Tree 
 
 Node* Node::removeChild(std::string const& name) {
   Node* unwanted = getChild(name);

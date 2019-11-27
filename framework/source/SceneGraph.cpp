@@ -9,6 +9,7 @@ SceneGraph::SceneGraph() {
   // }
 }
 
+//
 SceneGraph::~SceneGraph() {
   root_ = nullptr;
 }

@@ -16,6 +16,8 @@ Each created Node can either be a Parent or Child Node. Each created node is giv
 used to identify it when parsing through the tree. 
 */
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 class Node {
  protected:
   Node* parent_;
