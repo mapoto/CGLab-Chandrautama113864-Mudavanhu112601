@@ -19,6 +19,8 @@ using namespace gl;
 #include <glm/gtx/rotate_vector.hpp>
 
 #include <iostream>
+/////////////////////////////////////////////////////////////////////////////////////
+//User Defined Solar Application Constructor 
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
     : Application{resource_path},
@@ -31,11 +33,17 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeShaderPrograms();
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+//The Application Destructor used to end the and free resources used in the Application
+
 ApplicationSolar::~ApplicationSolar() {
   glDeleteBuffers(1, &planet_object.vertex_BO);
   glDeleteBuffers(1, &planet_object.element_BO);
   glDeleteVertexArrays(1, &planet_object.vertex_AO);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
+//Rendering the Solar System Application
 
 void ApplicationSolar::render() const {
   // list of nodes in graph below the root including sun, camera and planets
@@ -51,6 +59,7 @@ void ApplicationSolar::render() const {
   render_scene(solar_system, distance, solar_system_origin);
 }
 
+//Rendering all the Nodes in the Scene by looping through the Tree (SceneGraph)
 void ApplicationSolar::render_scene(
     std::list<Node*> const& sol,
     glm::fvec3& distance,
@@ -119,6 +128,10 @@ void ApplicationSolar::process_planet_matrix(
   planet->setWorldTransform(planet_matrix);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//The Moon Matrix that give the Moon its attributes with relativity to its 
+//Parent Planet 
+
 void ApplicationSolar::process_moon_matrix(
     Node* moon,
     Node* planet,
@@ -141,6 +154,9 @@ void ApplicationSolar::process_moon_matrix(
 
   moon->setWorldTransform(moon_matrix);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//Rendering the Planet using the shaders 
 
 void ApplicationSolar::render_node(Node* planet) const {
   // bind shader to upload uniforms
@@ -166,9 +182,15 @@ void ApplicationSolar::render_node(Node* planet) const {
                  model::INDEX.type, NULL);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//Setting the View od the Camera
+
 void ApplicationSolar::set_m_view_transform(glm::fmat4 const& cam_matrix) {
   m_view_transform = cam_matrix;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//Updating the new Vview of the Camera 
 
 void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be
@@ -178,6 +200,9 @@ void ApplicationSolar::uploadView() {
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"), 1,
                      GL_FALSE, glm::value_ptr(view_matrix));
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//Uploading the Projection to be processed by the GPU from the Memory
 
 void ApplicationSolar::uploadProjection() {
   // upload matrix to gpu
@@ -219,10 +244,10 @@ void ApplicationSolar::initialize_scene_graph() {
   create_planet("holder_uranus", planet_model);
   create_planet("holder_neptune", planet_model);
 
-  // find earth and attach the moon
-  create_moon_for_planet("holder_earth", "holder_moon", planet_model);
+  //Craeting the Moon's obit and attaching it to the Earths Orbit 
+  create_moon_for_planet("holder_earth", "holder_moon",planet_model);
 
-  // print the graph structure
+  //Printing the Scenegraph
   std::cout << scene_graph.printGraph() << std::endl;
 }
 
