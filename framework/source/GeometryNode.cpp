@@ -8,12 +8,12 @@ GeometryNode::GeometryNode(std::string const& name, model const& geometry_model)
     : Node{name}, geometry_{geometry_model} {}
 
 //Destructor
-GeometryNode::~GeometryNode(){};
+GeometryNode::~GeometryNode(){}
 
 //Function Call that gets the Model for the Geometry
 model GeometryNode::getGeometry() const {
   return geometry_;
-};
+}
 
 //Function Call that sets the Model to the Geometry
 void GeometryNode::setGeometry(model const& geometry_model) {
