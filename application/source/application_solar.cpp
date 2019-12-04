@@ -410,26 +410,30 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     m_view_transform =
         glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -1.0f});
     uploadView();
-    std::cout << "key W pressed: camera zoom in" << std::endl;
+    std::cout << "key W pressed: camera Zoom In" << std::endl;
+    
   } else if (key == GLFW_KEY_S &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
         glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 1.0f});
     uploadView();
-    std::cout << "key s pressed: camera backward" << std::endl;
+    std::cout << "key S pressed: camera Zoom Out" << std::endl;
+
   } else if (key == GLFW_KEY_A &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
         glm::translate(m_view_transform, glm::fvec3{1.0f, 0.0f, 0.0f});
     uploadView();
-    std::cout << "key s pressed: camera backward" << std::endl;
+    std::cout << "key A pressed: Camera Angle Move Left" << std::endl;
+
   } else if (key == GLFW_KEY_D &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
         glm::translate(m_view_transform, glm::fvec3{-1.0f, 0.0f, 0.0f});
     uploadView();
-    std::cout << "key s pressed: camera backward" << std::endl;
+    std::cout << "key D pressed: camera Angle Move Right" << std::endl;
   }
+
   ///////////////////////////////////ARROW KEYS FOR CONTROL////////////////////////
   //I added the other keyboard controls to the seen we can now use the arrow keys as well
 
@@ -438,7 +442,7 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     m_view_transform =
         glm::translate(m_view_transform, glm::fvec3{-1.0f, 0.0f, 0.0f});
     uploadView();
-    std::cout << "key right pressed: camera backward" << std::endl;
+    std::cout << "key Right Arrow pressed: camera Angle Move Right" << std::endl;
   }
 
      else if (key == GLFW_KEY_LEFT &&
@@ -446,21 +450,23 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     m_view_transform =
         glm::translate(m_view_transform, glm::fvec3{1.0f, 0.0f, 0.0f});
     uploadView();
-    std::cout << "key Left pressed: camera backward" << std::endl;
+    std::cout << "key Left Arrow pressed: camera Angle Move Left" << std::endl;
   }
+
       else if (key == GLFW_KEY_DOWN &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
         glm::translate(m_view_transform, glm::fvec3{0.0f, 1.0f, 0.0f});
     uploadView();
-    std::cout << "key Down pressed: camera backward" << std::endl;
+    std::cout << "key Down Arrow pressed: camera Zoom Out" << std::endl;
   }
+
       else if (key == GLFW_KEY_UP &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
         glm::translate(m_view_transform, glm::fvec3{0.0f, -1.0f, 0.0f});
     uploadView();
-    std::cout << "key Up pressed: camera zoom" << std::endl;
+    std::cout << "key Up Arrow pressed: camera Zoom In" << std::endl;
   }
 
   //////////////////////////SCENE ROTATION ////////////////////////////////////
@@ -472,14 +478,15 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     m_view_transform =
         glm::rotate(m_view_transform, 0.01f, glm::fvec3{0.0f, 1.0f, 0.0f});
     uploadView();
-    std::cout << "key V pressed: camera rotate" << std::endl;
+    std::cout << "key V pressed: camera Rotate Clockwise" << std::endl;
   }
+
      else if (key == GLFW_KEY_X &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
         glm::rotate(m_view_transform, 0.01f, glm::fvec3{0.0f, -1.0f, 0.0f});
     uploadView();
-    std::cout << "key X pressed: camera rotate" << std::endl;
+    std::cout << "key X pressed: camera Rotate AntiClockwise" << std::endl;
   }
 }
 
