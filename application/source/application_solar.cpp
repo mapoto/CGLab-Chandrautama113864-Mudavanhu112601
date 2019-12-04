@@ -196,6 +196,7 @@ void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be
   // inverted
   glm::fmat4 view_matrix = glm::inverse(m_view_transform);
+  
   // upload matrix to gpu
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"), 1,
                      GL_FALSE, glm::value_ptr(view_matrix));
