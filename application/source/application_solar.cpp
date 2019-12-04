@@ -366,27 +366,78 @@ void ApplicationSolar::initializeGeometry(model& planet_model) {
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
   if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
-        glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -5.0f});
+        glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -0.1f});
     uploadView();
-    std::cout << "key w pressed: camera forward" << std::endl;
+    std::cout << "key W pressed: camera zoom in" << std::endl;
   } else if (key == GLFW_KEY_S &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
-        glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 5.0f});
+        glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 0.1f});
     uploadView();
     std::cout << "key s pressed: camera backward" << std::endl;
   } else if (key == GLFW_KEY_A &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
-        glm::translate(m_view_transform, glm::fvec3{5.0f, 0.0f, 0.0f});
+        glm::translate(m_view_transform, glm::fvec3{1.0f, 0.0f, 0.0f});
     uploadView();
     std::cout << "key s pressed: camera backward" << std::endl;
   } else if (key == GLFW_KEY_D &&
              (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform =
-        glm::translate(m_view_transform, glm::fvec3{-5.0f, 0.0f, 0.0f});
+        glm::translate(m_view_transform, glm::fvec3{-1.0f, 0.0f, 0.0f});
     uploadView();
     std::cout << "key s pressed: camera backward" << std::endl;
+  }
+  ///////////////////////////////////ARROW KEYS FOR CONTROL////////////////////////
+  //I added the other keyboard controls to the seen we can now use the arrow keys as well
+
+   else if (key == GLFW_KEY_RIGHT &&
+             (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform =
+        glm::translate(m_view_transform, glm::fvec3{-1.0f, 0.0f, 0.0f});
+    uploadView();
+    std::cout << "key right pressed: camera backward" << std::endl;
+  }
+
+     else if (key == GLFW_KEY_LEFT &&
+             (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform =
+        glm::translate(m_view_transform, glm::fvec3{1.0f, 0.0f, 0.0f});
+    uploadView();
+    std::cout << "key Left pressed: camera backward" << std::endl;
+  }
+      else if (key == GLFW_KEY_DOWN &&
+             (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform =
+        glm::translate(m_view_transform, glm::fvec3{0.0f, 1.0f, 0.0f});
+    uploadView();
+    std::cout << "key Down pressed: camera backward" << std::endl;
+  }
+      else if (key == GLFW_KEY_UP &&
+             (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform =
+        glm::translate(m_view_transform, glm::fvec3{0.0f, -1.0f, 0.0f});
+    uploadView();
+    std::cout << "key Up pressed: camera zoom" << std::endl;
+  }
+
+  //////////////////////////SCENE ROTATION ////////////////////////////////////
+  //So far l managed to make the scene rotate but its rotating arounf the camera
+  //Will see how best l can make it rotate around the sun in stead 
+
+      else if (key == GLFW_KEY_V &&
+             (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform =
+        glm::rotate(m_view_transform, 0.1f, glm::fvec3{0.0f, 1.0f, 0.0f});
+    uploadView();
+    std::cout << "key V pressed: camera rotate" << std::endl;
+  }
+     else if (key == GLFW_KEY_X &&
+             (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform =
+        glm::rotate(m_view_transform, 0.1f, glm::fvec3{0.0f, -1.0f, 0.0f});
+    uploadView();
+    std::cout << "key X pressed: camera rotate" << std::endl;
   }
 }
 
@@ -395,7 +446,7 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   // mouse handling
   std::cout << pos_x << ":" << pos_y << std::endl;
   m_view_transform =
-      glm::rotate(m_view_transform, 0.1f, glm::vec3{pos_y, pos_x, 0.0f});
+      glm::rotate(m_view_transform, 0.01f, glm::vec3{pos_y, pos_x, 0.0f});
   uploadView();
 }
 

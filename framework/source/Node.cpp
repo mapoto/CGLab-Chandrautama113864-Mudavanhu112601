@@ -135,7 +135,7 @@ void Node::addChild(Node* node) {
   node->path_ = this->path_ + node->path_;
   node->depth_ = this->depth_ + 1;
   node->parent_ = this;
-  node->worldTransform_ = this->localTransform_;
+  node->worldTransform_ = this->localTransform_; // multiply with parent world trans mat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
