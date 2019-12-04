@@ -57,7 +57,8 @@ class ApplicationSolar : public Application {
 
   //Creating the moon and assigning it to the desired Planet 
   void create_moon_for_planet(std::string const& planet_name,
-                              std::string const& moon_name);
+                              std::string const& moon_name,
+                              model const& moon_model);
 
   //The Matrix that creates the Planet and gives it's relative distance and speed in the Solar system
   void process_planet_matrix(Node* planet,

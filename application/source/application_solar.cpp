@@ -98,10 +98,7 @@ void ApplicationSolar::render_scene(
   }
 }
 
-////////////////////////////////////////////////////////////////////////////
-//The Planet matrix that allows us to keep all the planets in thier obits 
-//And thier different attributes
-
+// calculate the matrix
 void ApplicationSolar::process_planet_matrix(
     Node* planet,
     glm::fvec3& distance,
@@ -140,6 +137,8 @@ void ApplicationSolar::process_moon_matrix(
     Node* planet,
     glm::fvec3 const& distance_from_planet,
     glm::fvec3 const& moon_size) const {
+  
+  // multiplication to bring it to the same world coordinate system
   glm::fmat4 moon_matrix =
       glm::translate(moon->getWorldTransform() * planet->getWorldTransform(),
                      distance_from_planet);
@@ -222,16 +221,18 @@ void ApplicationSolar::uploadUniforms() {
 
 ///////////////////////////// intialisation functions /////////////////////////
 
+// Populate the scene_graph with all the necessary nodes
 void ApplicationSolar::initialize_scene_graph() {
+  // load the model to be used in geometry nodes creation and shader
   model planet_model;
   initializeGeometry(planet_model);
 
-//Intializing the Root of the Scenegraph and giving it a default name 
+  // Create root node as a pointer to prevent it being destroyed in stack
   Node* root_node = new Node{"root"};
   scene_graph.setRoot(root_node);
   scene_graph.setName("scene_graph_1");
 
-//Creating all the Planets as Nodes that we need to render in our scene 
+  // Build the entire graph one nodes at a time (with geometry for the planets)
   create_camera("camera");
   create_sun("holder_sun", planet_model);
   create_planet("holder_mercury", planet_model);
@@ -244,59 +245,99 @@ void ApplicationSolar::initialize_scene_graph() {
   create_planet("holder_neptune", planet_model);
 
   //Craeting the Moon's obit and attaching it to the Earths Orbit 
-  create_moon_for_planet("holder_earth", "holder_moon");
+  create_moon_for_planet("holder_earth", "holder_moon",planet_model);
 
   //Printing the Scenegraph
   std::cout << scene_graph.printGraph() << std::endl;
 }
 
+// Create camera node
 void ApplicationSolar::create_camera(std::string const& camera_name) {
+  // As a pointer to prevent it being destroyed in stack
   CameraNode* cam = new CameraNode{camera_name};
+
+  // Setter for further modification
   cam->setEnabled(true);
   cam->setPerspective(true);
 
+  // Attach camera node to directly to the node
   scene_graph.getRoot()->addChild(cam);
 
+  // Some in place variable to shorten the code
   auto cam_world_matrix = cam->getWorldTransform();
   auto cam_local_matrix = cam->getLocalTransform();
 
+  // translate camera position upwards
   cam_world_matrix =
       glm::translate(cam_world_matrix, glm::fvec3{0.0f, 50.0f, 0.0F});
+
+  // rotate the camera so it is facing downwards
   cam_world_matrix =
       glm::rotate(cam_world_matrix, 3.14f / 2, glm::vec3{-1.0f, 0.0f, 0.0f});
+
+  // the new transformation to the camera with respect to the world
   cam->setWorldTransform(cam_world_matrix);
 
+  // calculate the model matrix cam
   glm::fmat4 model_matrix_cam = cam_world_matrix * cam_local_matrix;
 
+  // use the result as view transform matrix for the viewport used by
+  // application
   set_m_view_transform(model_matrix_cam);
 }
 
+// create sun node with sun_name as its name and take loaded model
 void ApplicationSolar::create_sun(std::string const& sun_name,
                                   model const& sun_model) {
+  // As a normal node pointer until light is fully implemented
   Node* sun_holder = new Node{sun_name};
+
+  // Create its the geometry
   GeometryNode* sun_geometry =
       new GeometryNode{"geometry_" + sun_name, sun_model};
+
+  // Attach the sun node to the root directly
   scene_graph.getRoot()->addChild(sun_holder);
+
+  // Attach its geometry to the sun node
   sun_holder->addChild(sun_geometry);
 }
 
+// create a planet node with planet_name and a loaded model for its geometry
 void ApplicationSolar::create_planet(std::string const& planet_name,
                                      model const& planet_model) {
+  // Create it as node pointer to prevent it being destroyed
   Node* planet = new Node{planet_name};
+
+  // Attach the planet node to the root directly
   scene_graph.getRoot()->addChild(planet);
 
+  // Create its the geometry
   GeometryNode* geometry =
       new GeometryNode{"geometry_" + planet_name, planet_model};
 
+  // Attach its geometry to the planet node
   planet->addChild(geometry);
 }
 
+// Create a moon for a planet using its name
 void ApplicationSolar::create_moon_for_planet(std::string const& planet_name,
-                                              std::string const& moon_name) {
+                                              std::string const& moon_name,
+                                              model const& moon_model) {
+  // find the planet by its name and assign it to a in place variable
   auto wanted_planet = (scene_graph.getRoot())->getChild(planet_name);
-  Node* moon = new Node{moon_name};
+
   if (wanted_planet != nullptr) {
+    // Create it as node pointer to prevent it being destroyed
+    Node* moon = new Node{moon_name};
     wanted_planet->addChild(moon);
+
+    // Create its the geometry with the model
+    GeometryNode* moon_geometry =
+        new GeometryNode{"geometry_" + moon_name, moon_model};
+
+    // add the geometry to the moon
+    moon->addChild(moon_geometry);
   }
 }
 
@@ -445,6 +486,8 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   // mouse handling
   std::cout << pos_x << ":" << pos_y << std::endl;
+  
+  // as a first person camera
   m_view_transform =
       glm::rotate(m_view_transform, 0.01f, glm::vec3{pos_y, pos_x, 0.0f});
   uploadView();
