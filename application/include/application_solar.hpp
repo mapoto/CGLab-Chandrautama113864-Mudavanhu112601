@@ -5,6 +5,7 @@
 #include "application.hpp"
 #include "model.hpp"
 #include "structs.hpp"
+#include "GeometryNode.hpp"
 
 // gpu representation of model
 class ApplicationSolar : public Application {
@@ -23,6 +24,7 @@ class ApplicationSolar : public Application {
 
   // draw all objects
   void render() const;
+  void renderStars() const; 
 
  protected:
   /////////////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +33,8 @@ class ApplicationSolar : public Application {
   void initialize_scene_graph();
   void initializeShaderPrograms();
   void initializeGeometry(model& planet_model);
+  void initializeGeometry();
+  void initializeStars();
 
   // update uniform values
   void uploadUniforms();
@@ -80,16 +84,26 @@ class ApplicationSolar : public Application {
   //Rendering a Node as a Planet in our Scene
   void render_node(Node* planet) const;
 
+
+
   //Creating a SceneGraph
   SceneGraph scene_graph;
 
   // cpu representation of model
   model_object planet_object;
+  model_object star_object;
 
   // camera transform matrix
   glm::fmat4 m_view_transform;
   // camera projection matrix
   glm::fmat4 m_view_projection;
+
+
+  model star_model;
+
+  std::vector<float> m_stars;
+
+
 };
 
 #endif
