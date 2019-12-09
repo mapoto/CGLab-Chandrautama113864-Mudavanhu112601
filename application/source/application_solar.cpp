@@ -33,6 +33,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
           utils::calculate_projection_matrix(initial_aspect_ratio)} {
   initialize_scene_graph();
   initialize_stars(3000);
+  initialize_orbits(720);
   initializeShaderPrograms();
   // initializeShaderPrograms(1, "shaders/simple.vert", "shaders/simple.frag");
   // initializeShaderPrograms(2, "shaders/vao.vert", "shaders/vao.frag");
@@ -70,8 +71,6 @@ void ApplicationSolar::render() const {
 }
 // render Stars
 void ApplicationSolar::render_stars() const {
-  std::cout << "render stars" << std::endl;
-
   glUseProgram(m_shaders.at("stars").handle);
   glBindVertexArray(star_object.vertex_AO);
   glPointSize(3.0);
@@ -119,7 +118,6 @@ void ApplicationSolar::render_scene(
 
 // Rendering the Planet using the shader
 void ApplicationSolar::render_node(Node* planet) const {
-  std::cout << "render planet nodes" << std::endl;
 
   // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
@@ -144,9 +142,10 @@ void ApplicationSolar::render_node(Node* planet) const {
                  model::INDEX.type, NULL);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////// calculate transform Matrix
+///////////////////////////////////
 
-// calculate the matrix
+// calculate planet world matrix
 void ApplicationSolar::process_planet_matrix(
     Node* planet,
     glm::fvec3& distance,
@@ -176,10 +175,8 @@ void ApplicationSolar::process_planet_matrix(
   planet->setWorldTransform(planet_matrix);
 }
 
-/////////////////////////////////////////////////////////////////////////////
 // The Moon Matrix that give the Moon its attributes with relativity to its
 // Parent Planet
-
 void ApplicationSolar::process_moon_matrix(
     Node* moon,
     Node* planet,
@@ -209,9 +206,8 @@ void ApplicationSolar::set_m_view_transform(glm::fmat4 const& cam_matrix) {
   m_view_transform = cam_matrix;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////// upload shaders ////////////////////////////////
 // Updating the new Vview of the Camera
-
 void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be
   // inverted
@@ -230,7 +226,6 @@ void ApplicationSolar::uploadView() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Uploading the Projection to be processed by the GPU from the Memory
-
 void ApplicationSolar::uploadProjection() {
   glUseProgram(m_shaders.at("planet").handle);
   // upload star projection matrix to gpu
@@ -356,7 +351,7 @@ void ApplicationSolar::initialize_stars(unsigned int const stars_count) {
           static_cast<float>(std::rand() % 100) - (50.0f / 2);
       gl::GLfloat color_elem =
           static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-      //auto block_iter = m_stars.begin() + (i * 6 + index);
+      // auto block_iter = m_stars.begin() + (i * 6 + index);
       m_stars.insert(m_stars.begin() + (i * 6 + index), coord_elem);
       m_stars.insert(m_stars.begin() + (i * 6 + index) + 3, color_elem);
     }
@@ -364,6 +359,16 @@ void ApplicationSolar::initialize_stars(unsigned int const stars_count) {
 
   model star_model;
   initializeGeometry(m_stars);
+}
+
+void ApplicationSolar::initialize_orbits(unsigned int const num) {
+  std::vector<GLfloat> orbits;
+  orbits.resize(num*3);
+  for (unsigned int i = 0; i < num; ++i) {
+    std::vector<GLfloat> xyz {cosf(i * M_PI / (num/2)), 0, sinf(i * M_PI / (num/2))} ;
+    orbits.insert(orbits.begin()+3*i, xyz.begin(),xyz.end());
+  }
+
 }
 
 void ApplicationSolar::initializeGeometry(model& planet_model) {

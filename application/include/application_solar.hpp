@@ -24,20 +24,28 @@ class ApplicationSolar : public Application {
 
   // draw all objects
   void render() const;
-  void renderStars() const;
-
  protected:
+
+  // Rendering the Scene with all the Nodes and thier relative distances
+  void render_scene(std::list<Node*> const& sol,
+                    glm::fvec3& distance,
+                    glm::fmat4 const& solar_system_origin) const;
+
+  void render_stars() const;
+
+  // Rendering a Node as a Planet in our Scene
+  void render_node(Node* planet) const;
+
   /////////////////////////////////////////////////////////////////////////////////////////
   // initializing the SceneGraph, the Shader and the Geometry
 
   void initialize_scene_graph();
   void initialize_stars(unsigned int const stars_count);
+  void initialize_orbits(unsigned int const num);
 
   void initializeShaderPrograms();
   // void initializeShaderPrograms(unsigned int index, std::string const& shader_path, std::string const& frag_path);
-  // void initializeGeometry(model& planet_model);
-  // void initializeGeometry();
-  // void initializeStars();
+
   void initializeGeometry(model& object_model,
                           model_object& model_object,
                           unsigned int const model_index);
@@ -86,15 +94,7 @@ class ApplicationSolar : public Application {
                            glm::fvec3 const& distance_from_planet,
                            glm::fvec3 const& moon_size) const;
 
-  // Rendering the Scene with all the Nodes and thier relative distances
-  void render_scene(std::list<Node*> const& sol,
-                    glm::fvec3& distance,
-                    glm::fmat4 const& solar_system_origin) const;
-
-  void render_stars() const;
-
-  // Rendering a Node as a Planet in our Scene
-  void render_node(Node* planet) const;
+ 
 
   // Creating a SceneGraph
   SceneGraph scene_graph;
@@ -102,7 +102,6 @@ class ApplicationSolar : public Application {
   // cpu representation of model
   model_object planet_object;
   model_object star_object;
-
 
   // camera transform matrix
   glm::fmat4 m_view_transform;
