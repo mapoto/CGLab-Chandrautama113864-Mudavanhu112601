@@ -51,7 +51,7 @@ class ApplicationSolar : public Application {
                           unsigned int const model_index);
 
   void initializeGeometry(model& planet_model);
-  void initializeGeometry(std::vector<GLfloat> const& stars);
+  void initializeGeometry(std::vector<GLfloat> const& stars, unsigned int const& index);
 
   // update uniform values
   void uploadUniforms();
@@ -102,6 +102,7 @@ class ApplicationSolar : public Application {
   // cpu representation of model
   model_object planet_object;
   model_object star_object;
+  model_object orbit_object;
 
   // camera transform matrix
   glm::fmat4 m_view_transform;
