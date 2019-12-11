@@ -28,6 +28,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
       scene_graph{},
       planet_object{},
       star_object{},
+      orbit_object{},
       m_view_transform{},
       m_view_projection{
           utils::calculate_projection_matrix(initial_aspect_ratio)} {
@@ -50,6 +51,9 @@ ApplicationSolar::~ApplicationSolar() {
 
   glDeleteBuffers(1, &star_object.vertex_BO);
   glDeleteVertexArrays(1, &star_object.vertex_AO);
+
+  glDeleteBuffers(1, &orbit_object.vertex_BO);
+  glDeleteVertexArrays(1, &orbit_object.vertex_AO);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -68,6 +72,7 @@ void ApplicationSolar::render() const {
 
   render_scene(solar_system, distance, solar_system_origin);
   render_stars();
+  //render_orbits();
 }
 // render Stars
 void ApplicationSolar::render_stars() const {
@@ -76,6 +81,15 @@ void ApplicationSolar::render_stars() const {
   glPointSize(3.0);
   glDrawArrays(star_object.draw_mode, gl::GLint(0), star_object.num_elements);
 }
+
+// render Stars
+void ApplicationSolar::render_orbits() const {
+  glUseProgram(m_shaders.at("orbits").handle);
+  glBindVertexArray(orbit_object.vertex_AO);
+  glPointSize(10.0);
+  glDrawArrays(orbit_object.draw_mode, gl::GLint(0), orbit_object.num_elements);
+}
+
 
 // Rendering all the Nodes in the Scene by looping through the Tree (SceneGraph)
 void ApplicationSolar::render_scene(
@@ -386,6 +400,8 @@ void ApplicationSolar::initialize_orbits(unsigned int const num) {
 
   initializeGeometry(orbits, 2);
 }
+
+
 
 void ApplicationSolar::initializeGeometry(model& planet_model) {
   planet_model =

@@ -32,6 +32,7 @@ class ApplicationSolar : public Application {
                     glm::fmat4 const& solar_system_origin) const;
 
   void render_stars() const;
+  void render_orbits() const;
 
   // Rendering a Node as a Planet in our Scene
   void render_node(Node* planet) const;
@@ -108,6 +109,10 @@ class ApplicationSolar : public Application {
   glm::fmat4 m_view_transform;
   // camera projection matrix
   glm::fmat4 m_view_projection;
+
+  std::vector<float>m_orbits;
+  
+
 
 };
 
