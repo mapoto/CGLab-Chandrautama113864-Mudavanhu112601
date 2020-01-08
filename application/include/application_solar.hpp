@@ -35,7 +35,9 @@ class ApplicationSolar : public Application {
   void render_orbits() const;
 
   // Rendering a Node as a Planet in our Scene
-  void render_node(Node* planet, PointLightNode* sun) const;
+  void render_planet(Node* planet, PointLightNode* sun) const;
+
+  void render_sun(Node* sun) const;
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // initializing the SceneGraph, the Shader and the Geometry
@@ -45,7 +47,7 @@ class ApplicationSolar : public Application {
   void initialize_orbits(unsigned int const num);
 
   void initializeShaderPrograms();
-
+  void initializeGeometrySun(model& sun_model);
   void initializeGeometry(model& planet_model);
   void initializeGeometry(std::vector<GLfloat> const& stars,
                           unsigned int const& index);
@@ -101,6 +103,7 @@ class ApplicationSolar : public Application {
 
   // cpu representation of model
   model_object planet_object;
+  model_object sun_object;
   model_object star_object;
   model_object orbit_object;
 

@@ -94,30 +94,37 @@ void ApplicationSolar::render_scene(
 
   // loop through all elements below the root
   for (auto planet : sol) {
-    if (planet->getName() == "sun_holder") {
-      sun_temp =
-          static_cast<PointLightNode*>(planet->getChild("sun_point_light"));
-    }
     // ignore rendering the camera
     if (planet->getName() != "camera") {
-      // calculate the matrix of each planet
-      process_planet_matrix(planet, distance, solar_system_origin,
-                            planet_rotation_speed_factor);
+      if (planet->getName() == "sun_holder") {
+        sun_temp =
+            static_cast<PointLightNode*>(planet->getChild("sun_point_light"));
+        process_planet_matrix(planet, distance, solar_system_origin,
+                              planet_rotation_speed_factor);
 
-      // use it to get the image for this frame
-      render_node(planet, sun_temp);
+        // use it to get the image for this frame
+        render_sun(planet);
 
-      auto moons = planet->getChildrenList();
+      } else {
+        // calculate the matrix of each planet
+        process_planet_matrix(planet, distance, solar_system_origin,
+                              planet_rotation_speed_factor);
 
-      if (!moons.empty()) {
-        glm::fvec3 moon_distance_from_planet = glm::fvec3{2.0f, 0.0f, 0.0f};
-        glm::fvec3 moon_size = glm::fvec3{0.5f};
+        // use it to get the image for this frame
+        render_planet(planet, sun_temp);
 
-        for (auto moon : moons) {
-          if (moon->getName() == "holder_moon") {
-            process_moon_matrix(moon, planet, moon_distance_from_planet,
-                                moon_size);
-            render_node(moon, sun_temp);
+        auto moons = planet->getChildrenList();
+
+        if (!moons.empty()) {
+          glm::fvec3 moon_distance_from_planet = glm::fvec3{2.0f, 0.0f, 0.0f};
+          glm::fvec3 moon_size = glm::fvec3{0.5f};
+
+          for (auto moon : moons) {
+            if (moon->getName() == "holder_moon") {
+              process_moon_matrix(moon, planet, moon_distance_from_planet,
+                                  moon_size);
+              render_planet(moon, sun_temp);
+            }
           }
         }
       }
@@ -130,73 +137,76 @@ void ApplicationSolar::render_scene(
 }
 
 // Rendering the Planet using the shader
-void ApplicationSolar::render_node(Node* planet, PointLightNode* sun) const {
-  if (planet->getName() != "sun_holder") {
-    // bind shader to upload uniforms
-    glUseProgram(m_shaders.at("planet").handle);
+void ApplicationSolar::render_planet(Node* planet, PointLightNode* sun) const {
 
-    // get the planet matrix at this frame
-    glm::fmat4 model_matrix = planet->getWorldTransform();
+  // bind shader to upload uniforms
+  glUseProgram(m_shaders.at("planet").handle);
 
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"), 1,
-                       GL_FALSE, glm::value_ptr(model_matrix));
+  // get the planet matrix at this frame
+  glm::fmat4 model_matrix = planet->getWorldTransform();
 
-    // extra matrix for normal transformation to keep them orthogonal to surface
-    glm::fmat4 normal_matrix =
-        glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"), 1,
-                       GL_FALSE, glm::value_ptr(normal_matrix));
+  glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"), 1,
+                     GL_FALSE, glm::value_ptr(model_matrix));
 
-    // bind the VAO to draw
-    glBindVertexArray(planet_object.vertex_AO);
+  // extra matrix for normal transformation to keep them orthogonal to surface
+  glm::fmat4 normal_matrix =
+      glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+  glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"), 1,
+                     GL_FALSE, glm::value_ptr(normal_matrix));
 
-    glUniform3f(
-        glGetUniformLocation(m_shaders.at("planet").handle, "planet_Color"),
-        planet->getColor().x, planet->getColor().y, planet->getColor().z);
+  // bind the VAO to draw
+  glBindVertexArray(planet_object.vertex_AO);
 
-    glUniform3f(
-        glGetUniformLocation(m_shaders.at("planet").handle, "light_Color"),
-        sun->getlightColour().x, sun->getlightColour().y,
-        sun->getlightColour().z);
+  glUniform3f(
+      glGetUniformLocation(m_shaders.at("planet").handle, "planet_Color"),
+      planet->getColor().x, planet->getColor().y, planet->getColor().z);
 
-    glUniform1f(
-        glGetUniformLocation(m_shaders.at("planet").handle, "light_Intensity"),
-        sun->getlightIntesity());
+  glUniform3f(
+      glGetUniformLocation(m_shaders.at("planet").handle, "light_Color"),
+      sun->getlightColour().x, sun->getlightColour().y,
+      sun->getlightColour().z);
 
-    glm::fvec4 light_position =
-        (sun->getWorldTransform() * glm::fvec4(0.0f, 0.0f, 0.0f, 1.0f));
+  glUniform1f(
+      glGetUniformLocation(m_shaders.at("planet").handle, "light_Intensity"),
+      sun->getlightIntesity());
 
-    glUniform3f(
-        glGetUniformLocation(m_shaders.at("planet").handle, "light_Pos"),
-        light_position.x, light_position.y, light_position.z);
+  glm::fvec4 light_position =
+      (sun->getWorldTransform() * glm::fvec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-    // draw bound vertex array using bound shader
-    glDrawElements(planet_object.draw_mode, planet_object.num_elements,
-                   model::INDEX.type, NULL);
-  } else {
-    
-    // bind shader to upload uniforms
-    glUseProgram(m_shaders.at("sun").handle);
+  glUniform3f(glGetUniformLocation(m_shaders.at("planet").handle, "light_Pos"),
+              light_position.x, light_position.y, light_position.z);
 
-    // get the planet matrix at this frame
-    glm::fmat4 model_matrix = planet->getWorldTransform();
+  // draw bound vertex array using bound shader
+  glDrawElements(planet_object.draw_mode, planet_object.num_elements,
+                 model::INDEX.type, NULL);
+}
 
-    glUniformMatrix4fv(m_shaders.at("sun").u_locs.at("ModelMatrix"), 1,
-                       GL_FALSE, glm::value_ptr(model_matrix));
+void ApplicationSolar::render_sun(Node* sun) const{
+  // bind shader to upload uniforms
+  glUseProgram(m_shaders.at("sun").handle);
 
-    // extra matrix for normal transformation to keep them orthogonal to surface
-    glm::fmat4 normal_matrix =
-        glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
-    glUniformMatrix4fv(m_shaders.at("sun").u_locs.at("NormalMatrix"), 1,
-                       GL_FALSE, glm::value_ptr(normal_matrix));
+  // get the planet matrix at this frame
+  glm::fmat4 model_matrix = sun->getWorldTransform();
 
-    // bind the VAO to draw
-    glBindVertexArray(planet_object.vertex_AO);
+  glUniformMatrix4fv(m_shaders.at("sun").u_locs.at("ModelMatrix"), 1, GL_FALSE,
+                     glm::value_ptr(model_matrix));
 
-    // draw bound vertex array using bound shader
-    glDrawElements(planet_object.draw_mode, planet_object.num_elements,
-                   model::INDEX.type, NULL);
-  }
+  // extra matrix for normal transformation to keep them orthogonal to surface
+  glm::fmat4 normal_matrix =
+      glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+  glUniformMatrix4fv(m_shaders.at("sun").u_locs.at("NormalMatrix"), 1, GL_FALSE,
+                     glm::value_ptr(normal_matrix));
+
+  // bind the VAO to draw
+  glBindVertexArray(sun_object.vertex_AO);
+
+  glUniform3f(
+      glGetUniformLocation(m_shaders.at("sun").handle, "sun_Color"),
+      sun->getColor().x, sun->getColor().y, sun->getColor().z);
+
+  // draw bound vertex array using bound shader
+  glDrawElements(sun_object.draw_mode, sun_object.num_elements,
+                 model::INDEX.type, NULL);
 }
 
 /* ----------------------- calculate transform matrix ----------------------- */
@@ -275,8 +285,8 @@ void ApplicationSolar::uploadView() {
 
   glUseProgram(m_shaders.at("sun").handle);
   // upload star projection matrix to gpu
-  glUniformMatrix4fv(m_shaders.at("sun").u_locs.at("ViewMatrix"), 1,
-                     GL_FALSE, glm::value_ptr(view_matrix));
+  glUniformMatrix4fv(m_shaders.at("sun").u_locs.at("ViewMatrix"), 1, GL_FALSE,
+                     glm::value_ptr(view_matrix));
 
   glUseProgram(m_shaders.at("stars").handle);
   // upload star projection matrix to gpu
@@ -295,6 +305,7 @@ void ApplicationSolar::uploadProjection() {
   // upload star projection matrix to gpu
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"), 1,
                      GL_FALSE, glm::value_ptr(m_view_projection));
+
   glUseProgram(m_shaders.at("sun").handle);
   // upload star projection matrix to gpu
   glUniformMatrix4fv(m_shaders.at("sun").u_locs.at("ProjectionMatrix"), 1,
@@ -371,6 +382,9 @@ void ApplicationSolar::initialize_scene_graph() {
   model planet_model;
   initializeGeometry(planet_model);
 
+  model sun_model;
+  initializeGeometrySun(sun_model);
+
   // Create root node as a pointer to prevent it being destroyed in stack
   Node* root_node = new Node{"root"};
   scene_graph.setRoot(root_node);
@@ -378,7 +392,7 @@ void ApplicationSolar::initialize_scene_graph() {
 
   // Build the entire graph one nodes at a time (with geometry for the planets)
   create_camera("camera");
-  create_sun("holder_sun", planet_model, glm::fvec3{1.0f, 1.0f, 1.0f});
+  create_sun("holder_sun", sun_model, glm::fvec3{1.0f, 1.0f, 1.0f});
   create_planet("holder_mercury", planet_model, glm::fvec3{1.0f, 1.0f, 0.3f});
   create_planet("holder_venus", planet_model, glm::fvec3{0.8f, 0.6f, 0.4f});
   create_planet("holder_earth", planet_model, glm::fvec3{0.1f, 1.0f, 0.8f});
@@ -469,6 +483,52 @@ void ApplicationSolar::initializeGeometry(model& planet_model) {
   planet_object.draw_mode = GL_TRIANGLES;
   // transfer number of indices to model object
   planet_object.num_elements = GLsizei(planet_model.indices.size());
+}
+
+// initializeGeometry when there is model to be used
+void ApplicationSolar::initializeGeometrySun(model& sun_model) {
+  sun_model =
+      model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+
+  // generate vertex array object
+  glGenVertexArrays(1, &sun_object.vertex_AO);
+  // bind the array for attaching buffers
+  glBindVertexArray(sun_object.vertex_AO);
+
+  // generate generic buffer
+  glGenBuffers(1, &sun_object.vertex_BO);
+  // bind this as an vertex array buffer containing all attributes
+  glBindBuffer(GL_ARRAY_BUFFER, sun_object.vertex_BO);
+  // configure currently bound array buffer
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * sun_model.data.size(),
+               sun_model.data.data(), GL_STATIC_DRAW);
+
+  // activate first attribute on gpu
+  glEnableVertexAttribArray(0);
+  // first attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type,
+                        GL_FALSE, sun_model.vertex_bytes,
+                        sun_model.offsets[model::POSITION]);
+  // activate second attribute on gpu
+  glEnableVertexAttribArray(1);
+  // second attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(1, model::NORMAL.components, model::NORMAL.type,
+                        GL_FALSE, sun_model.vertex_bytes,
+                        sun_model.offsets[model::NORMAL]);
+
+  // generate generic buffer
+  glGenBuffers(1, &sun_object.element_BO);
+  // bind this as an vertex array buffer containing all attributes
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sun_object.element_BO);
+  // configure currently bound array buffer
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               model::INDEX.size * sun_model.indices.size(),
+               sun_model.indices.data(), GL_STATIC_DRAW);
+
+  // store type of primitive to draw
+  sun_object.draw_mode = GL_TRIANGLES;
+  // transfer number of indices to model object
+  sun_object.num_elements = GLsizei(sun_model.indices.size());
 }
 
 // initializeGeometry when only array of data is available
