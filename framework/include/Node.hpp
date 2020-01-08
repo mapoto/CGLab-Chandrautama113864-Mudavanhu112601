@@ -27,6 +27,7 @@ class Node {
   int depth_;
   glm::mat4 localTransform_;
   glm::mat4 worldTransform_;
+  glm::fvec3 color_;
 
  public:
   //User Defined Constructor
@@ -64,6 +65,9 @@ class Node {
 
   //Used to remove a Node/ Child/ Parent by specifiying the name of the Node 
   Node* removeChild(std::string const& name);
+
+  glm::fvec3 getColor() const;
+  void setColor(glm::fvec3 const& inputColor);
 };
 
 #endif  // NODE.HPP

@@ -24,8 +24,8 @@ class ApplicationSolar : public Application {
 
   // draw all objects
   void render() const;
- protected:
 
+ protected:
   // Rendering the Scene with all the Nodes and thier relative distances
   void render_scene(std::list<Node*> const& sol,
                     glm::fvec3& distance,
@@ -45,14 +45,10 @@ class ApplicationSolar : public Application {
   void initialize_orbits(unsigned int const num);
 
   void initializeShaderPrograms();
-  // void initializeShaderPrograms(unsigned int index, std::string const& shader_path, std::string const& frag_path);
-
-  void initializeGeometry(model& object_model,
-                          model_object& model_object,
-                          unsigned int const model_index);
 
   void initializeGeometry(model& planet_model);
-  void initializeGeometry(std::vector<GLfloat> const& stars, unsigned int const& index);
+  void initializeGeometry(std::vector<GLfloat> const& stars,
+                          unsigned int const& index);
 
   // update uniform values
   void uploadUniforms();
@@ -72,15 +68,20 @@ class ApplicationSolar : public Application {
   void create_camera(std::string const& camera_name);
 
   // Creating the Sun, giving it its name and the Model
-  void create_sun(std::string const& sun_name, model const& sun_model);
+  void create_sun(std::string const& sun_name,
+                  model const& sun_model,
+                  glm::fvec3 const& sun_color);
 
   // Creating the Planet, giving it a Name and the Model
-  void create_planet(std::string const& planet_name, model const& planet_model);
+  void create_planet(std::string const& planet_name,
+                     model const& planet_model,
+                     glm::fvec3 const& planet_color);
 
   // Creating the moon and assigning it to the desired Planet
   void create_moon_for_planet(std::string const& planet_name,
                               std::string const& moon_name,
-                              model const& moon_model);
+                              model const& moon_model,
+                              glm::fvec3 const& moon_color);
 
   // The Matrix that creates the Planet and gives it's relative distance and
   // speed in the Solar system
@@ -95,8 +96,6 @@ class ApplicationSolar : public Application {
                            glm::fvec3 const& distance_from_planet,
                            glm::fvec3 const& moon_size) const;
 
- 
-
   // Creating a SceneGraph
   SceneGraph scene_graph;
 
@@ -109,11 +108,6 @@ class ApplicationSolar : public Application {
   glm::fmat4 m_view_transform;
   // camera projection matrix
   glm::fmat4 m_view_projection;
-
-  std::vector<float>m_orbits;
-  
-
-
 };
 
 #endif

@@ -105,6 +105,14 @@ glm::mat4 Node::getLocalTransform() const {
   return localTransform_;
 }
 
+glm::fvec3 Node::getColor() const{
+  return color_;
+}
+
+void Node::setColor(glm::fvec3 const& inputColor){
+  color_ = inputColor;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //Function for the setting the Local Transformation matrix of a new Node (Planet)
 
@@ -151,3 +159,5 @@ Node* Node::removeChild(std::string const& name) {
 
   return unwanted;
 }
+
+
