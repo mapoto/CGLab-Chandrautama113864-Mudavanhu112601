@@ -35,7 +35,7 @@ class ApplicationSolar : public Application {
   void render_orbits() const;
 
   // Rendering a Node as a Planet in our Scene
-  void render_node(Node* planet) const;
+  void render_node(Node* planet, PointLightNode* sun) const;
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // initializing the SceneGraph, the Shader and the Geometry

@@ -5,7 +5,7 @@
 
 class PointLightNode : public Node {
  private:
-  double lightIntensity;
+  float lightIntensity;
   glm::fvec3 lightColour;
 
  public:
@@ -13,11 +13,11 @@ class PointLightNode : public Node {
   PointLightNode(std::string const& name);
   ~PointLightNode();
 
-  double getLightIntesity() const;
+  float getlightIntesity() const;
   glm::fvec3 getlightColour() const;
 
   void setLightColour(glm::fvec3 const& inputLightColour);
-  void setLightIntensity (double inputLightIntensity);
+  void setLightIntensity (float inputLightIntensity);
 
 };
 

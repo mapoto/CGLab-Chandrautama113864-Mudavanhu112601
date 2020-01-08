@@ -4,7 +4,7 @@ PointLightNode::PointLightNode() : Node{} {}
 PointLightNode::PointLightNode(std::string const& name) : Node{name} {}
 PointLightNode::~PointLightNode() {}
 
-double PointLightNode::getLightIntesity() const {
+float PointLightNode::getlightIntesity() const {
   return lightIntensity;
 }
 
@@ -16,6 +16,6 @@ void PointLightNode::setLightColour(glm::fvec3 const& inputLightColour) {
   lightColour = inputLightColour;
 }
 
-void PointLightNode::setLightIntensity(double inputLightIntensity) {
+void PointLightNode::setLightIntensity(float inputLightIntensity) {
   lightIntensity = inputLightIntensity;
 }
