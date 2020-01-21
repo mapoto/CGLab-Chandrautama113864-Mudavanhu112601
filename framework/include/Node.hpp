@@ -12,8 +12,8 @@
 /*
 The Node Class is responsible for creating the different Nodes in the Sceen Graph.
 Some A Root Node is the Ancestor node for the rest of all the nodes that that are in the tree
-Each created Node can either be a Parent or Child Node. Each created node is given a name to be 
-used to identify it when parsing through the tree. 
+Each created Node can either be a Parent or Child Node. Each created node is given a name to be
+used to identify it when parsing through the tree.
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ class Node {
   int depth_;
   glm::mat4 localTransform_;
   glm::mat4 worldTransform_;
-  glm::fvec3 color_;
+  
 
  public:
   //User Defined Constructor
@@ -36,7 +36,7 @@ class Node {
   //Default Constructor
   Node();
 
-  //Destructor 
+  //Destructor
   ~Node();
 
   //Used to Set a Node as a Parent Node
@@ -63,11 +63,9 @@ class Node {
   //Used to add or Creat a new Node/ Child/ Parent
   void addChild(Node* node);
 
-  //Used to remove a Node/ Child/ Parent by specifiying the name of the Node 
+  //Used to remove a Node/ Child/ Parent by specifiying the name of the Node
   Node* removeChild(std::string const& name);
 
-  glm::fvec3 getColor() const;
-  void setColor(glm::fvec3 const& inputColor);
 };
 
 #endif  // NODE.HPP

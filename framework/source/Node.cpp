@@ -5,8 +5,8 @@
 //User defined Constructor Used to create a new Node and assign a name, a path and the depth in the Tree(Scenegraph)
 Node::Node(std::string const& name)
     : name_{name}, path_{"\\" + name_}, depth_{0} {
-  localTransform_ = glm::fmat4{};
-  worldTransform_ = glm::fmat4{};
+  localTransform_ = glm::fmat4{1.0f};
+  worldTransform_ = glm::fmat4{1.0f};
   parent_ = nullptr;
 }
 
@@ -105,14 +105,6 @@ glm::mat4 Node::getLocalTransform() const {
   return localTransform_;
 }
 
-glm::fvec3 Node::getColor() const{
-  return color_;
-}
-
-void Node::setColor(glm::fvec3 const& inputColor){
-  color_ = inputColor;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //Function for the setting the Local Transformation matrix of a new Node (Planet)
 
@@ -130,7 +122,7 @@ glm::mat4 Node::getWorldTransform() const {
 ////////////////////////////////////////////////////////////////////////////////
 //
 void Node::setWorldTransform(glm::mat4 const& inputMatrix) {
-  worldTransform_ = inputMatrix;
+  worldTransform_ = localTransform_ * inputMatrix * parent_->worldTransform_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

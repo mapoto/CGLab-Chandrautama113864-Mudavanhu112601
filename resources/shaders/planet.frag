@@ -20,14 +20,14 @@ void main() {
   
   vec3 halfway = normalize(dir_View + dir_Light);
 
-  vec3 ambient = ambient_Str * light_Color* planet_Color;
+  vec3 ambient = ambient_Str  * planet_Color;
   
   float diffuse_factor = max(dot(normal,dir_Light),0); 
-  vec3 diffuse = diffuse_factor * planet_Color;
+  vec3 diffuse = diffuse_factor  * planet_Color;
 
   float specular_factor = pow(max(dot(dir_View, halfway), 0.0), 24.0);
-  vec3 specular = light_Color* specular_factor;
+  vec3 specular =  light_Color * specular_factor;
 
-  out_Color = vec4(ambient + diffuse + light_Intensity*light_Color  + specular, 1.0);
+  out_Color = vec4(ambient + diffuse  + specular, 0.0);
 
 }

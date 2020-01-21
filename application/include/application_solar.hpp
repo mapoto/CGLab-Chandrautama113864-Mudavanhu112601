@@ -27,7 +27,7 @@ class ApplicationSolar : public Application {
 
  protected:
   // Rendering the Scene with all the Nodes and thier relative distances
-  void render_scene(std::list<Node*> const& sol,
+  void render_scene(Node* root,
                     glm::fvec3& distance,
                     glm::fmat4 const& solar_system_origin) const;
 
@@ -35,9 +35,7 @@ class ApplicationSolar : public Application {
   void render_orbits() const;
 
   // Rendering a Node as a Planet in our Scene
-  void render_planet(Node* planet, PointLightNode* sun) const;
-
-  void render_sun(Node* sun) const;
+  void render_planet(GeometryNode* planet, PointLightNode* sun) const;
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // initializing the SceneGraph, the Shader and the Geometry
@@ -47,10 +45,10 @@ class ApplicationSolar : public Application {
   void initialize_orbits(unsigned int const num);
 
   void initializeShaderPrograms();
-  void initializeGeometrySun(model& sun_model);
   void initializeGeometry(model& planet_model);
   void initializeGeometry(std::vector<GLfloat> const& stars,
                           unsigned int const& index);
+  void initializeTextures();
 
   // update uniform values
   void uploadUniforms();
@@ -77,13 +75,15 @@ class ApplicationSolar : public Application {
   // Creating the Planet, giving it a Name and the Model
   void create_planet(std::string const& planet_name,
                      model const& planet_model,
-                     glm::fvec3 const& planet_color);
+                     glm::fvec3 const& planet_color,
+                     std::string const& texture_name);
 
   // Creating the moon and assigning it to the desired Planet
   void create_moon_for_planet(std::string const& planet_name,
                               std::string const& moon_name,
                               model const& moon_model,
-                              glm::fvec3 const& moon_color);
+                              glm::fvec3 const& moon_color,
+                              std::string const& texture_name);
 
   // The Matrix that creates the Planet and gives it's relative distance and
   // speed in the Solar system
@@ -103,9 +103,10 @@ class ApplicationSolar : public Application {
 
   // cpu representation of model
   model_object planet_object;
-  model_object sun_object;
   model_object star_object;
   model_object orbit_object;
+
+  std::vector<texture_object> planet_color_attachment;
 
   // camera transform matrix
   glm::fmat4 m_view_transform;
