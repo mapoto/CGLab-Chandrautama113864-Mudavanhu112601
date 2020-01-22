@@ -35,7 +35,7 @@ class ApplicationSolar : public Application {
   void render_orbits() const;
 
   // Rendering a Node as a Planet in our Scene
-  void render_planet(GeometryNode* planet, PointLightNode* sun) const;
+  void render_planet(GeometryNode* planet, PointLightNode* sun, uint32_t const planet_index) const;
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // initializing the SceneGraph, the Shader and the Geometry
@@ -105,8 +105,6 @@ class ApplicationSolar : public Application {
   model_object planet_object;
   model_object star_object;
   model_object orbit_object;
-
-  std::vector<texture_object> planet_color_attachment;
 
   // camera transform matrix
   glm::fmat4 m_view_transform;

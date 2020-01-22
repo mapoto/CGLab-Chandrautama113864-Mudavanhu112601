@@ -9,7 +9,11 @@ GeometryNode::GeometryNode(std::string const& name,
                            model const& geometry_model,
                            glm::fvec3 const& color,
                            pixel_data const& texture)
-    : Node{name}, geometry_{geometry_model}, color_{color}, texture_{texture} {}
+    : Node{name},
+      geometry_{geometry_model},
+      color_{color},
+      texture_{texture},
+      planet_texture_obj_{} {}
 
 // Destructor
 GeometryNode::~GeometryNode() {}
@@ -38,4 +42,16 @@ pixel_data GeometryNode::getTexture() const {
 
 void GeometryNode::setTexture(pixel_data const& input_texture) {
   texture_ = input_texture;
+}
+
+texture_object GeometryNode::getTextureObj() const {
+  return planet_texture_obj_;
+}
+void GeometryNode::setTextureObj(texture_object const input_texture_obj) {
+  planet_texture_obj_ = input_texture_obj;
+}
+
+void GeometryNode::setTextureObjAttribute(gl::GLuint const& handle, gl::GLenum const& target){
+  planet_texture_obj_.handle = handle;
+  planet_texture_obj_.target = target;
 }

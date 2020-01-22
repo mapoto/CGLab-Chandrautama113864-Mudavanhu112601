@@ -4,6 +4,7 @@
 #include <Node.hpp>
 #include <model.hpp>
 #include <pixel_data.hpp>
+#include "structs.hpp"
 
 ///////////////////////////////////////////////////////////////////
 
@@ -12,6 +13,7 @@ class GeometryNode : public Node {
   model geometry_;
   glm::fvec3 color_;
   pixel_data texture_;
+  texture_object planet_texture_obj_;
 
  public:
   // User Defined Constructor of the GeometryNode
@@ -32,6 +34,11 @@ class GeometryNode : public Node {
 
   pixel_data getTexture() const;
   void setTexture(pixel_data const& input_texture);
+
+  texture_object getTextureObj() const;
+  void setTextureObj(texture_object const input_texture_obj);
+  void setTextureObjAttribute(gl::GLuint const& handle, gl::GLenum const& target);
+  
 };
 
 #endif  // GEOMETRY_NODE_HPP

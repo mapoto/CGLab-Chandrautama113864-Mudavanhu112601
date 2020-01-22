@@ -31,15 +31,14 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
       planet_object{},
       star_object{},
       orbit_object{},
-      planet_color_attachment{},
       m_view_transform{},
       m_view_projection{
           utils::calculate_projection_matrix(initial_aspect_ratio)} {
   initialize_scene_graph();
   initialize_stars(3000);
   initialize_orbits(720);
-  initializeShaderPrograms();
   initializeTextures();
+  initializeShaderPrograms();
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -98,6 +97,7 @@ void ApplicationSolar::render_scene(
   PointLightNode* sun_temp = static_cast<PointLightNode*>(
       root->getChild("holder_sun")->getChild("point_light"));
 
+  uint32_t texture_index = 0;
   // loop through all elements below the root
   for (auto planet : sol) {
     // ignore rendering the camera
@@ -109,10 +109,10 @@ void ApplicationSolar::render_scene(
       GeometryNode* planet_geo =
           static_cast<GeometryNode*>(planet->getChildrenList().front());
       // use it to get the image for this frame
-      render_planet(planet_geo, sun_temp);
+      render_planet(planet_geo, sun_temp, texture_index);
 
       auto moons = planet->getChildrenList();
-
+      uint32_t moon_texture_index = 0;
       if (!moons.empty()) {
         glm::fvec3 moon_distance_from_planet = glm::fvec3{2.0f, 0.0f, 0.0f};
         glm::fvec3 moon_size = glm::fvec3{0.5f};
@@ -125,7 +125,8 @@ void ApplicationSolar::render_scene(
             GeometryNode* moon_geo =
                 static_cast<GeometryNode*>(moon->getChildrenList().front());
 
-            render_planet(moon_geo, sun_temp);
+            // render_planet(moon_geo, sun_temp, moon_texture_index);
+            ++moon_texture_index;
           }
         }
       }
@@ -133,13 +134,15 @@ void ApplicationSolar::render_scene(
       // lazy increment for the next planet
       distance += glm::fvec3{4.0f, 0.0f, 0.0f};
       ++planet_rotation_speed_factor;
+      ++texture_index;
     }
   }
 }
 
 // Rendering the Planet using the shader
 void ApplicationSolar::render_planet(GeometryNode* planet,
-                                     PointLightNode* sun) const {
+                                     PointLightNode* sun,
+                                     uint32_t const planet_index) const {
   // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
 
@@ -155,13 +158,12 @@ void ApplicationSolar::render_planet(GeometryNode* planet,
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"), 1,
                      GL_FALSE, glm::value_ptr(normal_matrix));
 
-  // bind the VAO to draw
-  glBindVertexArray(planet_object.vertex_AO);
-
+  // draw planet with color
   glUniform3f(
       glGetUniformLocation(m_shaders.at("planet").handle, "planet_Color"),
       planet->getColor().x, planet->getColor().y, planet->getColor().z);
 
+  // setup the lighting properties
   glUniform3f(
       glGetUniformLocation(m_shaders.at("planet").handle, "light_Color"),
       sun->getlightColour().x, sun->getlightColour().y,
@@ -176,6 +178,19 @@ void ApplicationSolar::render_planet(GeometryNode* planet,
 
   glUniform3f(glGetUniformLocation(m_shaders.at("planet").handle, "light_Pos"),
               light_position.x, light_position.y, light_position.z);
+
+  // draw the planet's texture
+  texture_object planet_texture_object = planet->getTextureObj();
+  
+  glActiveTexture(GL_TEXTURE1+planet_index);
+  glBindTexture(planet_texture_object.target, planet_texture_object.handle);
+  
+  glUniform1i(
+      glGetUniformLocation(m_shaders.at("planet").handle, "planet_Texture"),
+      planet_texture_object.handle);
+
+  // bind the VAO to draw
+  glBindVertexArray(planet_object.vertex_AO);
 
   // draw bound vertex array using bound shader
   glDrawElements(planet_object.draw_mode, planet_object.num_elements,
@@ -294,31 +309,66 @@ void ApplicationSolar::uploadUniforms() {
 
 void ApplicationSolar::initializeTextures() {
   auto const& planets = scene_graph.getRoot()->getChildrenList();
-  planet_color_attachment.resize(planets.size()-1);
-  std::fill(planet_color_attachment.begin(), planet_color_attachment.end(),
-            texture_object());
-  uint32_t index = 0;
-  for (auto const& planet : planets) {
+
+  // initialize the texture object for the planet
+  uint32_t texture_index = 0;
+  for (auto planet : planets) {
     if (!(planet->getName() == "camera")) {
       GeometryNode* planet_geo =
           static_cast<GeometryNode*>(planet->getChildrenList().front());
 
-      auto texture = planet_geo->getTexture();
+      auto planet_texture = planet_geo->getTexture();
+      planet_geo->setTextureObjAttribute(0, GL_TEXTURE_2D);
 
-      glActiveTexture(GL_TEXTURE0);
-      glGenTextures(1, &planet_color_attachment[index].handle);
-      glBindTexture(GL_TEXTURE_2D, planet_color_attachment[index].handle);
+      auto texture_object = planet_geo->getTextureObj();
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                      GL_LINEAR);  // scale down
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                      GL_LINEAR);  // scale up (render texture on area bigger
-                                   // than the texture)
-      glTexImage2D(GL_TEXTURE_2D, 0, texture.channels, texture.width,
-                   texture.height, 0, texture.channels, texture.channel_type,
-                   texture.ptr());
+      glActiveTexture(GL_TEXTURE1+texture_index);
+      glGenTextures(1, &(texture_object.handle));
 
-      ++index;
+      glBindTexture(texture_object.target, texture_object.handle);
+
+      glTexParameteri(texture_object.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(texture_object.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+      glTexParameteri(texture_object.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(texture_object.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      glTexImage2D(texture_object.target, 0, planet_texture.channels,
+                   planet_texture.width, planet_texture.height, 0,
+                   planet_texture.channels, planet_texture.channel_type,
+                   planet_texture.ptr());
+      glGenerateMipmap(texture_object.target);
+
+      planet_geo->setTextureObj(texture_object);
+
+      // initialize the texture object for the moon if exist
+      uint32_t moon_texture_index = 0;
+      /*
+      auto moon = planet->getChild("holder_moon");
+      if (moon != nullptr) {
+        auto moon_geo =
+            static_cast<GeometryNode*>(moon->getChildrenList().front());
+
+        auto moon_texture = moon_geo->getTexture();
+        auto moon_texture_obj = moon_geo->getTextureObj();
+
+        glActiveTexture(GL_TEXTURE1+moon_texture_index);
+        glGenTextures(1, &moon_texture_obj.handle);
+        glBindTexture(GL_TEXTURE_2D, moon_texture_obj.handle);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                        GL_LINEAR);  // scale down
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                        GL_LINEAR);  // scale up (render texture on area bigger
+                                     // than the texture)
+        glTexImage2D(GL_TEXTURE_2D, 0, moon_texture.channels,
+                     moon_texture.width, moon_texture.height, 0,
+                     moon_texture.channels, moon_texture.channel_type,
+                     moon_texture.ptr());
+      }
+      */
+
+      ++texture_index;
     }
   }
 }
@@ -428,8 +478,8 @@ void ApplicationSolar::initialize_orbits(unsigned int const num) {
 
 // initializeGeometry when there is model to be used
 void ApplicationSolar::initializeGeometry(model& planet_model) {
-  planet_model =
-      model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+  planet_model = model_loader::obj(m_resource_path + "models/sphere.obj",
+                                   model::NORMAL | model::TEXCOORD);
 
   // generate vertex array object
   glGenVertexArrays(1, &planet_object.vertex_AO);
@@ -465,6 +515,11 @@ void ApplicationSolar::initializeGeometry(model& planet_model) {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                model::INDEX.size * planet_model.indices.size(),
                planet_model.indices.data(), GL_STATIC_DRAW);
+
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, model::TEXCOORD.components, model::TEXCOORD.type,
+                        GL_FALSE, planet_model.vertex_bytes,
+                        planet_model.offsets[model::TEXCOORD]);
 
   // store type of primitive to draw
   planet_object.draw_mode = GL_TRIANGLES;
@@ -532,7 +587,7 @@ void ApplicationSolar::initializeGeometry(
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                             GLsizei(sizeof(float) * 3), 0);
 
-      orbit_object.draw_mode = GL_LINES;
+      orbit_object.draw_mode = GL_LINE_LOOP;
 
       orbit_object.num_elements = GLsizei(data_vector.size() / 3);
 
