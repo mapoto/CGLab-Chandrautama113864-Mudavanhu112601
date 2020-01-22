@@ -36,6 +36,7 @@ class ApplicationSolar : public Application {
 
   // Rendering a Node as a Planet in our Scene
   void render_planet(GeometryNode* planet, PointLightNode* sun, uint32_t const planet_index) const;
+  void render_skybox() const;
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // initializing the SceneGraph, the Shader and the Geometry
@@ -49,6 +50,7 @@ class ApplicationSolar : public Application {
   void initializeGeometry(std::vector<GLfloat> const& stars,
                           unsigned int const& index);
   void initializeTextures();
+  void initializeSkybox();
 
   // update uniform values
   void uploadUniforms();
@@ -105,6 +107,11 @@ class ApplicationSolar : public Application {
   model_object planet_object;
   model_object star_object;
   model_object orbit_object;
+  model_object skybox_object;
+  
+  
+  texture_object skybox_texture_object = {0, GL_TEXTURE_CUBE_MAP};
+  std::vector<pixel_data> skybox_textures;
 
   // camera transform matrix
   glm::fmat4 m_view_transform;

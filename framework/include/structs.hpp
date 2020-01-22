@@ -1,9 +1,9 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 
-#include <map>
 #include <glbinding/gl/gl.h>
-// use gl definitions from glbinding 
+#include <map>
+// use gl definitions from glbinding
 using namespace gl;
 
 // gpu representation of model
@@ -22,6 +22,10 @@ struct model_object {
 
 // gpu representation of texture
 struct texture_object {
+  texture_object(GLuint handle_, GLenum target_)
+      : handle{handle_}, target{target_} {}
+  texture_object() : handle{0}, target{GL_NONE} {}
+
   // handle of texture object
   GLuint handle = 0;
   // binding point
@@ -31,9 +35,7 @@ struct texture_object {
 // shader handle and uniform storage
 struct shader_program {
   shader_program(std::map<GLenum, std::string> paths)
-   :shader_paths{paths}
-   ,handle{0}
-   {}
+      : shader_paths{paths}, handle{0} {}
 
   // paths to shader sources
   std::map<GLenum, std::string> shader_paths;
