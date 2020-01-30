@@ -122,7 +122,7 @@ glm::mat4 Node::getWorldTransform() const {
 ////////////////////////////////////////////////////////////////////////////////
 //
 void Node::setWorldTransform(glm::mat4 const& inputMatrix) {
-  worldTransform_ = localTransform_ * inputMatrix * parent_->worldTransform_;
+  worldTransform_ = localTransform_ * inputMatrix;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -27,15 +27,15 @@ class ApplicationSolar : public Application {
 
  protected:
   // Rendering the Scene with all the Nodes and thier relative distances
-  void render_scene(Node* root,
-                    glm::fvec3& distance,
-                    glm::fmat4 const& solar_system_origin) const;
+  void render_scene(Node* root, glm::fmat4 const& solar_system_origin) const;
 
   void render_stars() const;
   void render_orbits() const;
 
   // Rendering a Node as a Planet in our Scene
-  void render_planet(GeometryNode* planet, PointLightNode* sun, uint32_t const planet_index) const;
+  void render_planet(Node* planet,
+                     PointLightNode* sun,
+                     uint32_t const planet_index) const;
   void render_skybox() const;
 
   /////////////////////////////////////////////////////////////////////////////////////////
@@ -108,8 +108,7 @@ class ApplicationSolar : public Application {
   model_object star_object;
   model_object orbit_object;
   model_object skybox_object;
-  
-  
+
   texture_object skybox_texture_object = {0, GL_TEXTURE_CUBE_MAP};
   std::vector<pixel_data> skybox_textures;
 
